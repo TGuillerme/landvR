@@ -28,7 +28,7 @@
 #' @importFrom zoo rollmean
 
 
-coordinates.area <- function(data, what = "radius") {
+coordinates.area <- function(data, what = 1) {
 
     ## Sanitising
     class_what <- class(what)

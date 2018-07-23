@@ -4,7 +4,7 @@
 \alias{coordinates.area}
 \title{Coordinates area}
 \usage{
-coordinates.area(data, what = "radius")
+coordinates.area(data, what = 1)
 }
 \arguments{
 \item{data}{The \code{matrix} of coordinate differences.}
