@@ -1,0 +1,8 @@
+citHeader("To cite the dispRity package, please use:")
+
+citEntry(entry = "XXX",
+		 title = "XXX",
+         author = personList(as.person("Thomas Guillerme")),
+         journal = "XXX",
+         year = "2018"
+         )

@@ -1,0 +1,1975 @@
+model_test_sim_output <- model.test.sim(sim = -10, model = model_test_output, time.split = c(105, 100))
+model_test_sim_output <- model.test.sim(sim = -10, model = "BM", time.split = c(105, 100))
+model_test_sim_output <- model.test.sim(sim = -10, model = "BM", time.split = c(1, 2))
+model_test_sim_output <- model.test.sim(sim = 10, model = "BM", time.split = c(1, 5))
+#' @name model.test.sim#
+#'#
+#' @title Simulate Model Test#
+#'#
+#' @description Simulate models of disparity change through time#
+#'#
+#' @param sim The number of separate simulations to run.#
+#' @param model Either (i) the named model of evolution to simulate for changes in disparity-through-time using a homogenous or hetergenous model (see list in \code{\link{model.test}}) or (ii) an object of class \code{dispRity} returned from \code{model.test} function. If a \code{dispRity} object is supplied, all remaining arguments apart from \code{sim} and \code{model.rank} and \code{alternative} are ignored as the model specified by the input model is used.#
+#' @param model.rank If a \code{dispRity} object is supplied, which model is used for simulation. The rank refers to the order of models as specified by AICc, so if \code{model.rank = 1} (default) the best-fitting model is used for simulation.#
+#' @param alternative If the simulation is based on a \code{dispRity} object, what is the alternative hypothesis: can be \code{"two-sided"} (default), \code{"greater"} or \code{"lesser"}.#
+#' @param time.split The age of the change in mode. The age is measured as the time before the most recent sample, and multiple ages can be supplied in a vector. Note this only applies to heterogenous models.#
+#' @param time.span The length of the sequence (\code{numeric}). If one number is supplied this is treated as the length of the sequence and the time span is treated as sequence from 0 to \code{time.span} in unit increments. If a vector of length > 1 is supplied, this is treated as the the age of each sample in the sequence.#
+#' @param variance The variance of each sample (\code{numeric}). If one number is supplied this is the variance for all samples in the sequence. If a vector of equal length to the \code{time.span} vector is supplied, this is used for the variance of each sample in the sequence#
+#' @param sample.size The sample size of each sample (\code{numeric}). If one number is supplied this is the sample size for all samples in the sequence. If a vector of equal length to the \code{time.span} vector is supplied, this is used for the sample size of each sample in the sequence#
+#' @param parameters A \code{list} of model parameters used for simulations. See details.#
+#' @param fixed.optima A \code{logical} value, whether to use an estimated optimum value in OU models (\code{FALSE} - default), or whether to set the OU optimum to the ancestral value (\code{TRUE}).#
+#' #
+#' @return A list of class \code{dispRity} and \code{model.sim}. Each list element contains the simulated central tendency, as well as the variance, sample size, and subsets used to simulate the data.#
+#' #
+#' @details#
+#' The \code{parameters} is a list of arguments to be passed to the models.#
+#' These arguments can be:#
+#' \itemize{#
+#'      \item{\code{ancestral.state}}, ancestral value of the disparity applicable to all models (default = \code{0.01}).#
+#'      \item{\code{sigma.squared}}, rate of step variance to all models except Stasis (default = \code{1}).#
+#'      \item{\code{alpha}}, strength of attraction to the optimum in OU models (default = \code{1}).#
+#'      \item{\code{optima.1}}, the value of the optimum in a OU model, or the first bin optimum in a multi-OU model (default = \code{0.15}).#
+#'      \item{\code{optima.2}}, the second bin optimum in a multi-OU model (default = \code{0.15}).#
+#'      \item{\code{optima.3}}, the third bin optimum in a multi-OU model (default = \code{0.15}).#
+#'      \item{\code{theta.1}}, the mean in a Stasis model, or the first bin mean in a multi-Stasis model (default = \code{1}).#
+#'      \item{\code{theta.2}}, the second bin optimum in a multi-OU model (default = \code{1}).#
+#'      \item{\code{theta.3}}, the third bin optimum in a multi-OU model (default = \code{1}).#
+#'      \item{\code{omega}}, the variance in a Stasis model (default = \code{1}).#
+#'      \item{\code{trend}}, the trend parameter in the Trend model (default = \code{0.5}).#
+#'      \item{\code{eb.rate}}, the rate of exponential rate decrease in the EB model (default = \code{-0.1}).#
+#' }#
+#'#
+#' @examples#
+#' ## Disparity through time data#
+#' data(BeckLee_disparity)#
+#'#
+#' ## List of models to test#
+#' models <- list("Trend", "BM")#
+#'#
+#' ## Testing the models on the observed disparity#
+#' model_test_output <- model.test(BeckLee_disparity, models, time.split = 66)#
+#'  #
+#' ## simulations using the output from model.test#
+#' model_test_sim_output <- model.test.sim(sim = 1000, model= model_test_output)#
+#'  #
+#' ## Plot the simulated best model#
+#' plot(model_test_sim_output)#
+#' ## Add the observed data#
+#' plot(BeckLee_disparity, add = TRUE, col = c("pink", "#ff000050", "#ff000050"))#
+#' #
+#' ## Simulating a specific model with specific parameters parameters#
+#' model_simulation <- model.test.sim(sim = 1000, model = "BM", time.span = 120, variance = 0.1,#
+#'                                    sample.size = 100, parameters = list(ancestral.state = 0,#
+#'                                    sigma.squared = 0.1))#
+#' #
+#' ## Summarising the results#
+#' plot(model_simulation, main = "A simple Brownian motion")#
+#' #
+#' @seealso \code{\link{model.test}}, \code{\link{model.test.wrapper}}, \code{\link{summary.dispRity}} and \code{\link{plot.dispRity}}#
+#'#
+#' @references Blomberg SP, Garland T Jr, & Ives AR. 2003. Testing for phylogenetic signal in comparative data: behavioral traits are more labile. Evolution.  \bold{57}, 717-745.#
+#' @references Hansen TF. 1997. Stabilizing selection and the comparative analysis of adaptation. Evolution. \bold{51}, 1341-1351.#
+#' @references Harmon LJ, \emph{et al}. 2010. Early bursts of body size and shape evolution are rare in comparative data. \bold{64}, 2385-2396.#
+#' @references Hunt G. 2006. Fitting and comparing models of phyletic evolution: random walks and beyond. Paleobiology. \bold{32}, 578-601. DOI: 10.1666/05070.1.#
+#' @references Hunt G, Hopkins MJ & Lidgard S. 2015. Simple versus complex models of trait evolution and stasis as a response to environmental change. Proceedings of the National Academy of Sciences. \bold{112}, 4885-4890. DOI: 10.1073/pnas.1403662111#
+#' @references Felsenstein J. 1973. Maximum-likelihood estimation of evolutionary trees from continuous characters. American Journal of Human Genetics. \bold{25}, 471-492.#
+#' @references Felsenstein J. 1985. Phylogenies and the comparative method. The American Naturalist. \bold{51}, 1-15.#
+#' @references Murrell DJ. 2018. A global envelope test to detect non-random bursts of trait evolution. Methods in Ecology and Evolution. DOI: 10.1111/2041-210X.13006#
+#
+#' #
+#' Citation for the envelope code:#
+# @misc{david_murrell_2018_1197535,#
+#  author       = {David Murrell},#
+#  title        = {{djmurrell/DTT-Envelope-code: Rank envelope test #
+#                   for disparity through time}},#
+#  month        = mar,#
+#  year         = 2018,#
+#  doi          = {10.5281/zenodo.1197535},#
+#  url          = {https://doi.org/10.5281/zenodo.1197535}#
+#}#
+#' #
+#' #
+#' @importFrom mnormt rmnorm#
+#' @author Mark N Puttick and Thomas Guillerme#
+#' @export#
+#
+# source("sanitizing.R")#
+# source("model.test_fun.R")#
+## Defaults#
+# sim = 1#
+# model = "BM"#
+# time.split = NULL#
+# time.span = 100#
+# variance = 1#
+# sample.size = 100#
+# parameters = list()#
+# fixed.optima = FALSE#
+# model.rank = 1#
+# alternative = "two-sided"#
+#
+model.test.sim <- function(sim = 1, model, model.rank = 1, alternative = "two-sided", time.split = NULL, time.span = 100, variance = 1, sample.size = 100, parameters = list(), fixed.optima = FALSE) {#
+    match_call <- match.call()#
+#
+    ## Sanitizing#
+    ## sim must be a positive whole number#
+    silent <- check.class(sim, c("numeric", "integer"))#
+    check.length(sim, 1, msg = " must be the number of simulations to run.")#
+    sim <- round(sim)#
+    if(sim < 0) {#
+        sim <- abs(sim)#
+    }#
+#
+    ## Model#
+    class <- check.class(model, c("character", "dispRity"), msg = " must be either a model name (character) or a dispRity object from model.test().")#
+    if(class == "character") {#
+        ## Model is provided#
+        model_inherit <- FALSE#
+        check.method(model, c("BM", "OU", "Trend", "Stasis", "EB", "multi.OU"), msg = "model")#
+#
+    } else {#
+        if(class(model)[[2]] != "model.test") {#
+            stop(paste0(match_call$model, " must be a dispRity object output from model.test.\nTry running model.test(", match_call$model, ") first."), call. = FALSE)#
+        }#
+        ## Model is inherited from the dispRity object#
+        model_inherit <- TRUE#
+    }#
+#
+    ## Setting up the parameters names (used latter in sanitzing)#
+    param_names <- c("ancestral.state", "sigma.squared", "alpha", "optima.1", "theta.1", "omega", "trend", "eb.rate","optima.2", "optima.3", "theta.2", "theta.3")#
+#
+    ## Check the optional arguments#
+    if(model_inherit) {#
+        ## Check if any argument is provided (but rank and sim).#
+        check.arg.inherit <- function(arg, default, inherit) {#
+            if(is.null(default)) {#
+                check <- !is.null(arg)#
+            } else {#
+                check <- arg != default#
+            }#
+            if(length(check) != 0 && check) {#
+                warning(paste0(strsplit(as.character(expression(match_call$time.split)), split = "\\$")[[1]][2], " argument ignored (inherited from ", inherit, ")."), call. = FALSE)#
+            }#
+        }#
+        ## Warn that arguments are ignored#
+        check.arg.inherit(match_call$time.split, NULL, match_call$model)#
+        check.arg.inherit(match_call$time.span, 100, match_call$model)#
+        check.arg.inherit(match_call$variance, 1, match_call$model)#
+        check.arg.inherit(match_call$sample.size, 100, match_call$model)#
+        check.arg.inherit(match_call$parameters, list(), match_call$model)#
+        check.arg.inherit(match_call$fixed.optima, FALSE, match_call$model)#
+#
+        ## model.rank#
+        silent <- check.class(model.rank, c("numeric", "integer"))#
+        check.length(model.rank, 1, " must be the value of ranked model to simulate.")#
+#
+        ##TODO: allow multiple model ranks#
+        if(model.rank > nrow(model$aic.models)) {#
+            stop("model.rank must be the value of ranked model to simulate.", call. = FALSE)#
+        }#
+#
+        ## Alternative#
+        check.method(alternative, c("two-sided", "greater", "lesser"), msg = "alternative")#
+        ## Translate the h1 for GET#
+        if(alternative == "two-sided") {#
+            alternative <- "two.sided"#
+        }#
+        if(alternative == "lesser") {#
+            alternative <- "less"#
+        }#
+        ## Get parameters from previous models#
+        test.p <- TRUE#
+        empirical.model <- model#
+        model.rank <- order(model[[1]][,1])[model.rank]#
+        model.details <- model[[2]][model.rank][[1]]#
+        model.name <- rownames(model[[1]])[model.rank]#
+        parameters <- model[[2]][[model.rank]]$par#
+        time.span <- model$model.data$subsets#
+        variance <- model$model.data$variance#
+        sample.size <- model$model.data$sample_size#
+        data.model.test <- list(variance, sample.size, time.span)#
+        names(data.model.test) <- c("variance", "sample_size", "subsets")#
+        if(any(names(model.details) == "split.time")) {#
+            time.split <- model.details$split.time#
+        } else {#
+            time.split <- NULL#
+        }#
+        fixed.optima <- model$fixed.optima#
+        names(parameters) <- sapply(names(parameters), function(x) gsub(" ", ".", x))#
+        parameters <- lapply(parameters, function(x) x)#
+        model <- model.name#
+        model <- strsplit(model, ":")[[1]]#
+        # MP: necessary for the combination of 'multi.OU' and 'fixed.optima=TRUE' otherwise simulations take wrong optimum#
+        if(fixed.optima && model == "multi.OU") parameters$optima.1 <- parameters$ancestral.state#
+#
+    } else {#
+#
+        ## time.span#
+        check.class(time.span, c("numeric", "integer"))#
+        if(length(time.span) == 1) {#
+            time.span <- c(1:(time.span))#
+        }#
+#
+        ## Setting the sample_length#
+        sample_length <- length(time.span)#
+#
+        ## variance#
+        check.class(variance, c("numeric", "integer"))#
+        if (length(variance) != sample_length) {#
+            variance <- rep(variance, sample_length)#
+        }#
+#
+        ## sample.size#
+        check.class(sample.size, c("numeric", "integer"))#
+        if (length(sample.size) != sample_length) {#
+            sample.size <- rep(sample.size, sample_length)#
+        }#
+#
+        ## Setting the model parameters#
+        data.model.test <- list(variance, sample.size, time.span)#
+        names(data.model.test) <- c("variance", "sample_size", "subsets")#
+#
+        ## time.split#
+        if(!is.null(time.split)) {#
+            silent <- check.class(time.split, c("numeric", "integer"))#
+            time.split <- sort(sapply(time.split, function(u) which.min(abs(u - rev(data.model.test[[3]])))))#
+        }#
+#
+        ## parameters#
+        check.class(parameters, "list")#
+        if(!is.null(names(parameters))) {#
+            check.method(names(parameters), param_names, "parameters names") #
+        }#
+#
+        ## fixed.optima#
+        check.class(fixed.optima, "logical")#
+#
+        ## Don't test p#
+        test.p <- FALSE#
+    }#
+#
+    ## Filling default parameters#
+    if(is.null(parameters$ancestral.state)) {#
+        parameters$ancestral.state <- 1e-2#
+    }#
+    if(is.null(parameters$sigma.squared)) {#
+        parameters$sigma.squared <- 1#
+    }#
+    if(is.null(parameters$alpha)) {#
+        parameters$alpha <- 1#
+    }#
+    if(is.null(parameters$optima.1)) {#
+        parameters$optima.1 <- 0.15#
+    }#
+    if(is.null(parameters$theta.1)) {#
+        parameters$theta.1 <- 1#
+    }#
+    if(is.null(parameters$omega)) {#
+        parameters$omega <- 1#
+    }#
+    if(is.null(parameters$trend)) {#
+        parameters$trend <- 0.5#
+    }#
+    if(is.null(parameters$eb.rate)) {#
+        parameters$eb.rate <- -0.1#
+    }#
+    if(is.null(parameters$optima.2)) {#
+        parameters$optima.2 <- 0.15#
+    }#
+    if(is.null(parameters$optima.3)) {#
+        parameters$optima.3 <- 0.15#
+    }#
+    if(is.null(parameters$theta.2)) {#
+        parameters$theta.2 <- 1#
+    }#
+    if(is.null(parameters$theta.3)) {#
+        parameters$theta.3 <- 1#
+    }#
+#
+    ## Reorder the parameters#
+    p <- unlist(parameters)[match(param_names, names(parameters))]#
+    # convert time.split to the closest integer in the time list object - same as is done for model.test#
+    if(is.numeric(time.split)) time.split <- sort(sapply(time.split, function(u) which.min(abs(u - rev(time.span)))))#
+    total.n <- length(time.span)#
+    sample.time <- 1:total.n#
+    split.here.vcv <- c(1, time.split)#
+    split.here.2.vcv <- c(time.split - 1, total.n)#
+    ou.mean <- NULL#
+#
+    any.model <- which(model == "multi.OU")#
+#
+    if(any(any.model, na.rm = TRUE)) {#
+        split.here.vcv <- split.here.2.vcv <- NULL#
+        ou.mean <- c(1, time.split, length(time.span))#
+        split.here.vcv <- c(1, split.here.vcv)#
+        split.here.2.vcv <- c(split.here.2.vcv, length(time.span))#
+    }#
+#
+    total_VCV <- matrix(0, nrow = total.n, ncol = total.n)#
+    total_mean <- c()#
+    optima.level.ou <- optima.level.stasis <-1#
+    model.anc <- model.alpha <- NULL#
+    time.int <- 1#
+    for(rec.model in 1:length(model)) {#
+#
+        time.x <- time.int #TG: time.int is always fixed to 1#
+#
+        # if(time.x == 1) {#
+            data.model.test.int <- lapply(data.model.test, function(k) k[sort(sample.time[split.here.vcv[time.x] : (split.here.2.vcv[time.x])] )])#
+            output.vcv <- est.VCV(p, data.model.test.int, model.type = model[time.x])#
+            output.mean <- est.mean(p, data.model.test.int, model.type = model[time.x], optima.level.ou = optima.level.ou, optima.level.stasis = optima.level.stasis, fixed.optima = fixed.optima, est.anc = TRUE, split.time = ou.mean)#
+#
+            if(model[1] == "BM") {#
+                est.anc <- FALSE#
+                model.anc <- p[1]#
+                time.int <- time.x + 1#
+            }#
+            if(model[1] == "OU") {#
+                optima.level.ou <- optima.level.ou + 1#
+                est.anc <- FALSE#
+                model.anc <- utils::tail(output.mean, 1)#
+                time.int <- time.x + 1#
+            }#
+            if(model[1] == "Stasis") {#
+                optima.level.stasis <- optima.level.stasis + 1#
+                model.anc <- p[5]#
+                est.anc <- FALSE#
+                time.int <- time.x + 1#
+            }#
+            if(model[1] == "Trend" || model[1] == "EB") {#
+                model.anc <- utils::tail(output.mean, 1)#
+                est.anc <- FALSE#
+                time.int <- time.x + 1#
+            }#
+        # } else {#
+        #     data.model.test.int <- lapply(data.model.test, function(k) k[sort(sample.time[split.here.vcv[time.x] : (split.here.2.vcv[time.x])] )])    #
+        #     time.out <- data.model.test.int[[3]]#
+        #     time.out.diff <- diff(time.out[1:2])#
+        #     time.out.2 <- time.out - (min(time.out) - time.out.diff)#
+        #     data.model.test.int[[3]] <- time.out.2#
+        #     output.vcv <- est.VCV(p, data.model.test.int, model.type=model[time.x])#
+        #     output.mean <- est.mean(p, data.model.test.in=data.model.test.int, model.type=model[time.x], optima.level.ou= optima.level.ou, optima.level.stasis= optima.level.stasis, fixed.optima=fixed.optima, est.anc=est.anc, model.anc=model.anc, split.time=NULL)#
+        #     if(model[time.x] == "BM") {#
+        #         est.anc <- FALSE#
+        #         model.anc <- p[1]#
+        #         time.int <- time.x + 1#
+        #     }#
+        #     if(model[time.x] == "OU") {#
+        #         optima.level.ou <- optima.level.ou + 1#
+        #         est.anc <- FALSE#
+        #         model.anc <- p[1]#
+        #         time.int <- time.x + 1#
+        #     }#
+        #     if(model[time.x] == "Stasis") {#
+        #         optima.level.stasis <- optima.level.stasis + 1#
+        #         model.anc <- p[5]#
+        #         est.anc <- FALSE#
+        #         time.int <- time.x + 1#
+        #     }#
+        #     if(model[time.x] == "Trend") {#
+        #         model.anc <- utils::tail(output.mean, 1)#
+        #         est.anc <- FALSE#
+        #         time.int <- time.x + 1#
+        #     }#
+        #     if(model[time.x] == "EB") {#
+        #         model.anc <- utils::tail(output.mean, 1)#
+        #         est.anc <- FALSE#
+        #         time.int <- time.x + 1#
+        #     }#
+        # }#
+#
+        total_VCV[split.here.vcv[time.x] : (split.here.2.vcv[time.x]), split.here.vcv[time.x] : (split.here.2.vcv[time.x]) ] <- output.vcv#
+        total_mean <- c(total_mean, output.mean)#
+    }#
+    output.values <- t(mnormt::rmnorm(n = sim, mean = total_mean, varcov = total_VCV))#
+    if(dim(output.values)[1] == 1) {#
+        output.values <- t(output.values)#
+    }#
+#
+    # run.one.simulation <- function(X, output.values, data.model.test) {#
+    #     output.full <- list(output.values[,X], data.model.test[[1]], data.model.test[[2]], data.model.test[[3]])#
+    #     names(output.full) <- c("central_tendency", "variance", "sample_size", "subsets")#
+    #     class(output.full) <- c("dispRity", "model.sim")#
+    #     return(output.full)#
+    # }#
+#
+    ## Transform the rmnorm into a list#
+    output.simulation <- apply(output.values, 2, function(X) {return(list("central_tendency" = X))})#
+    # output.simulation <- lapply(1:sim, run.one.simulation, output.values, data.model.test)#
+    output <- list()#
+    output$simulation.data <- list("sim" = output.simulation, "fix" = list("variance" = data.model.test[[1]], "sample_size" = data.model.test[[2]], "subsets" = data.model.test[[3]]))#
+    # output$simulation.data <- output.simulation#
+    if(test.p) {#
+        x <- list()#
+        x$sim <- sapply(output.simulation, function(x) x$central_tendency) #DEBUG: a 120*7 matrix#
+        x$central_tendency <- as.numeric(empirical.model[[4]]$central_tendency) #DEBUG: a 120 vector#
+        x$subsets <- as.numeric(empirical.model[[4]]$subsets) #DEBUG: a 120 vector#
+        output$p.value <- rank_env_dtt(x, alternative)#
+    }#
+#
+    ## Add the model call#
+    output$call <- match_call#
+    output$nsim <- sim#
+#
+    ## Add the inheritence from the previous object#
+    if(model_inherit) {#
+        model_results <- summary(empirical.model)[model.rank,]#
+        model_results <- model_results[-c(which(is.na(model_results)), 2, 3)]#
+        output$model <- matrix(model_results, nrow = 1, dimnames = list(model.name, names(model_results)))#
+    } else {#
+        output$model <- match_call$model#
+    }#
+#
+    class(output) <- c("dispRity", "model.sim")#
+    return(output)#
+}
+model_test_sim_output <- model.test.sim(sim = 10, model = "BM", time.split = c(50, 60), time.span = c(1:100))
+model_test_sim_output <- model.test.sim(sim = 10, model = "BM", time.split = c(50), time.span = c(1:100))
+model_test_sim_output <- model.test.sim(sim = 10, model = "BM", time.split = c(60), time.span = c(1:100))
+model_test_sim_output <- model.test.sim(sim = 10, model = "BM", time.split = c(1), time.span = c(1:100))
+setwd("/Users/TGuillerme/Packaging/dispRity/tests/testthat")
+context("plot.dispRity") #
+#
+## Loading the data#
+data("disparity")
+sum_data <- summary(disparity)
+summarised_data <- sum_data
+what = 2
+check.na <- function(row, extract, summarised_data) {#
+        if(!extract[row]) {#
+            extract[row] <- ifelse(all(is.na(summarised_data[row,-c(1,2)])), TRUE, FALSE)#
+        }#
+        return(extract[row])#
+    }
+!rarefaction
+what = "rows"
+what != "rows"
+!(what == "rows")
+what
+refresh.dispRity()
+data(disparity)
+plot(disparity, rarefaction = 5, type = "discrete")
+plot(disparity, rarefaction = 5, type = "p")
+disparity
+plot(disparity, rarefaction = 10, type = "l", add = TRUE)
+?plot.dispRity
+x <- disparity
+rarefaction = 5
+type = "l"
+rarefaction = 10
+add = TRUE
+setwd("/Users/TGuillerme/Packaging/dispRity/R")
+source("sanitizing.R")#
+source("plot.dispRity_fun.R")
+quantiles=c(50, 95)#
+cent.tend=median
+elements = FALSE#
+chrono.subsets = FALSE#
+observed = FALSE
+density = NULL#
+nclass = 10#
+coeff = 1#
+significance="cent.tend"#
+lines.args=NULL#
+token.args=NULL
+match_call <- match.call()
+length(class(data)) > 1
+check.class(data, "dispRity")#
+    ## must have one element called dispRity#
+    if(is.na(match("disparity", names(data)))) stop(paste0(as.expression(match_call$x), " must be contain disparity data.\nTry running dispRity(", as.expression(match_call$x), ", ...)"), call. = FALSE)#
+    ## Check if disparity is a value or a distribution#
+    is_distribution <- ifelse(length(data$disparity[[1]]$elements) != 1, TRUE, FALSE)#
+    ## Check the bootstraps#
+    is_bootstrapped <- ifelse(!is.null(data$call$bootstrap), TRUE, FALSE)
+## Only check if the data is_bootstrapped#
+    if(is_bootstrapped) {#
+        check.class(quantiles, "numeric", " must be any value between 1 and 100.")#
+#
+        ## Are quantiles probabilities or proportions ?#
+        if(any(quantiles < 1)) {#
+            ## Transform into proportion#
+            quantiles <- quantiles*100#
+        }#
+        ## Are quantiles proper proportions#
+        if(any(quantiles < 0) | any(quantiles > 100)) {#
+            stop("quantiles(s) must be any value between 0 and 100.", call. = FALSE)#
+        }#
+    }#
+#
+    ## cent.tend#
+    ## Must be a function#
+    check.class(cent.tend, "function")#
+    ## The function must work#
+    if(make.metric(cent.tend, silent = TRUE) != "level1") {#
+        stop("cent.tend argument must be a function that outputs a single numeric value.", call. = FALSE)#
+    }#
+#
+    ## type#
+    # if(length(data$subsets) == 1) {#
+    #     type <- "box"#
+    #     message("Only one subset of data available: type is set to \"box\".")#
+    # }
+if(missing(type)) {#
+        ## Set type to default#
+        if(any(grep("continuous", data$call$subsets))) {#
+            type <- "continuous"#
+        } else {#
+            type <- "box"#
+        }#
+    } else {#
+        ## type must be either "discrete", "d", "continuous", or "c"#
+        all_types <- c("continuous", "c", "box", "b", "line", "l", "polygon", "p")#
+        ## type must be a character string#
+        check.class(type, "character")#
+        type <- tolower(type)#
+        ## type must have only one element#
+        check.length(type, 1, paste(" argument must only one of the following:\n", paste(all_types, collapse=", "), ".", sep=""))#
+        check.method(type, all_types, "type argument")#
+        ## if type is a letter change it to the full word (lazy people...)#
+        type <- ifelse(type == "c", "continuous", type)#
+        type <- ifelse(type == "b", "box", type)#
+        type <- ifelse(type == "l", "line", type)#
+        type <- ifelse(type == "p", "polygon", type)#
+    }
+if(type == "continuous" & chrono.subsets) {#
+        ## Check if time.slicing was used (saved in call)#
+        if(data$call$subsets[1] == "continuous") {#
+            time_slicing <- names(data$subsets)#
+        }#
+    } #
+    if(!chrono.subsets) {#
+        time_slicing <- FALSE#
+    } else {#
+        time_slicing <- names(data$subsets)#
+    }
+check.class(elements, "logical")
+if(is.null(rarefaction)) {#
+        rarefaction <- FALSE#
+    }#
+    ## If data is not bootstrapped, rarefaction is FALSE#
+    if(!is_bootstrapped) {#
+        rarefaction <- FALSE#
+    }
+silent <- check.class(rarefaction, c("logical", "integer", "numeric"))#
+    if(class(rarefaction) != "logical") {#
+        ## Right class#
+        rarefaction <- as.numeric(rarefaction)#
+        check.length(rarefaction, 1, errorif = FALSE, msg = "Rarefaction must a single numeric value.")#
+        ## Check if all subsets have the appropriate rarefaction level#
+        rarefaction_subsets <- lapply(lapply(data$subsets, lapply, nrow), function(X) which(X[-1] == rarefaction)+1)#
+        ## Check if subsets have no rarefaction#
+        if(length(unlist(rarefaction_subsets)) != length(data$subsets)) {#
+            wrong_rarefaction <- lapply(rarefaction_subsets, function(X) ifelse(length(X) == 0, TRUE, FALSE))#
+            stop(paste("The following subsets do not contain ", rarefaction, " elements: ", paste(names(data$subsets)[unlist(wrong_rarefaction)], collapse = ", "), ".", sep = "" ))#
+        }#
+    }
+rarefaction <- as.numeric(rarefaction)
+check.length(rarefaction, 1, errorif = FALSE, msg = "Rarefaction must a single numeric value.")
+rarefaction_subsets <- lapply(lapply(data$subsets, lapply, nrow), function(X) which(X[-1] == rarefaction)+1)
+rarefaction_subsets
+length(unlist(rarefaction_subsets)) != length(data$subsets)
+wrong_rarefaction <- lapply(rarefaction_subsets, function(X) ifelse(length(X) == 0, TRUE, FALSE))#
+            stop(paste("The following subsets do not contain ", rarefaction, " elements: ", paste(names(data$subsets)[unlist(wrong_rarefaction)], collapse = ", "), ".", sep = "" ))
+check.class(observed, "logical")
+if(missing(xlab)) { #
+        xlab <- "default"#
+        if(!is.null(data$call$subsets) && data$call$subsets != "customised" && chrono.subsets != FALSE && rarefaction != TRUE) {#
+            xlab <- "Time (Mya)"#
+        }#
+    } else {#
+        ## length must be 1#
+        check.length(xlab, 1, " must be a character string.")#
+    }#
+#
+    ## ylab#
+    if(missing(ylab)) {#
+        ylab <- "default"#
+    } else {#
+        ## length must be #
+        if(elements == FALSE) {#
+            check.length(ylab, 1, " must be a character string.")#
+        } else {#
+            if(length(ylab) > 2) stop("ylab can have maximum of two elements.", call. = FALSE)#
+        }#
+    }#
+#
+    ## col#
+    ## if default, is ok#
+    if(missing(col)) {#
+        if(type == "box" & rarefaction != TRUE) {#
+            col <- "white"#
+        } else {#
+            col <- "default"#
+        }#
+    } else {#
+        check.class(col, "character", " must be a character string.")#
+    }#
+#
+    ## ylim#
+    if(missing(ylim)) {#
+        ylim <- "default"#
+    } else {#
+        check.class(ylim, "numeric")#
+        check.length(ylim, 2, " must be a vector of two elements.")#
+    }#
+#
+    ## add#
+    check.class(add, "logical")#
+#
+    ## density#
+    if(type == "continuous" || type == "polygon") {#
+        if(!is.null(density)) {#
+            check.class(density, "numeric")#
+            check.length(density, 1, " must be a single numeric value.")#
+        }#
+    }
+ylim <- "default"
+ylab <- "default"
+col <- "default"
+xlab <- "default"
+summarised_data <- summary.dispRity(data, quantiles = quantiles, cent.tend = cent.tend, digits = 5)
+default_arg <- set.default(summarised_data, data, elements = elements, ylim = ylim, xlab = xlab, ylab = ylab, col = col, rarefaction = rarefaction, type = type, is_bootstrapped = is_bootstrapped)#
+    ylim <- default_arg[[1]]#
+    xlab <- default_arg[[2]]#
+    ylab <- default_arg[[3]]#
+    col <- default_arg[[4]]
+rarefaction == TRUE
+summarised_data
+rarefaction
+is_bootstrapped
+type
+ylim
+xlab
+ylab
+col
+observed
+density
+points_n <- length(unique(summarised_data$subsets))
+dummy_mat <- matrix(1:points_n, ncol = points_n)#
+    colnames(dummy_mat) <- extract.from.summary(summarised_data, 1)
+shift = 0
+prev_axis <- par("xaxp")
+prev_axis
+points_n
+prev_axis[2] == points_n
+shift = 0.5
+## Set the shift parameter (for add)#
+    shift = 0#
+    if(add) {#
+        ## Is the previous plot the same size?#
+        prev_axis <- par("xaxp")#
+        if(prev_axis[2] == points_n) {#
+            shift = 0#
+        } else {#
+            shift = 0.5#
+        }#
+    }
+is_bootstrapped || is_distribution
+quantiles_n <- (ncol(summarised_data) - ifelse(is_bootstrapped, 4, 3))/2
+quantiles_n
+width <- 0.5 #points_n/(points_n*2)
+if(length(col) < (quantiles_n + 1)) {#
+            cols_missing <- (quantiles_n + 1) - length(col)#
+            colfun <- colorRampPalette(c("grey", "lightgrey"))#
+            col_tmp <- c(col, colfun(cols_missing))#
+            poly_col <- col_tmp[-1]#
+            poly_col <- rev(poly_col)#
+        } else {#
+            poly_col <- col[-1]#
+            poly_col <- rev(poly_col)#
+        }
+for (point in 1:points_n) {#
+                for(cis in 1:quantiles_n) {#
+                    ## Setting Y#
+                    y_vals<-c(extract.from.summary(summarised_data, ifelse(is_bootstrapped, 4, 3) + cis, rarefaction)[point],#
+                              extract.from.summary(summarised_data, (ifelse(is_bootstrapped, 4, 3) + quantiles_n*2) - (cis - 1), rarefaction)[point])#
+                    ## Plotting the box#
+                    lines(x = rep((point + shift), 2), y = y_vals, lty = (quantiles_n - cis + 1), lwd = cis * 1.5, col = col[[1]])#
+#
+                }#
+            }
+## Add the points estimates#
+        points(1:points_n + shift, extract.from.summary(summarised_data, ifelse(is_bootstrapped, 4, 3), rarefaction), col = col[[1]], pch = 19)
+plot.discrete <- function(summarised_data, rarefaction, is_bootstrapped, is_distribution, type, ylim, xlab, ylab, col, observed, add, density, ...) {#
+    ## How many points?#
+    points_n <- length(unique(summarised_data$subsets))#
+#
+    ## dummy matrix (for getting the nice boxplots split + column names)#
+    dummy_mat <- matrix(1:points_n, ncol = points_n)#
+    colnames(dummy_mat) <- extract.from.summary(summarised_data, 1)#
+#
+    ## Empty plot#
+    if(!add) {#
+        boxplot(dummy_mat, col = "white", border = "white", ylim = ylim, ylab = ylab[[1]], xlab = xlab, boxwex = 0.001,, type = "n", ...)#
+        #boxplot(dummy_mat, col = "white", border = "white", ylim = ylim, ylab = ylab[[1]], xlab = xlab, boxwex = 0.001, type = "n") ; warning("DEBUG: plot")#
+    }#
+#
+    ## Set the shift parameter (for add)#
+    shift = 0#
+    if(add) {#
+        ## Is the previous plot the same size?#
+        prev_axis <- par("xaxp")#
+        if(prev_axis[2] == points_n) {#
+            shift = 0#
+        } else {#
+            shift = 0.5#
+        }#
+    }#
+#
+    ## Check if bootstrapped#
+    if(is_bootstrapped || is_distribution) {#
+        ## How many quantiles?#
+        quantiles_n <- (ncol(summarised_data) - ifelse(is_bootstrapped, 4, 3))/2#
+#
+        ## Set the width (default)#
+        width <- 0.5 #points_n/(points_n*2)#
+#
+        ## Set the colours#
+        if(length(col) < (quantiles_n + 1)) {#
+            cols_missing <- (quantiles_n + 1) - length(col)#
+            colfun <- colorRampPalette(c("grey", "lightgrey"))#
+            col_tmp <- c(col, colfun(cols_missing))#
+            poly_col <- col_tmp[-1]#
+            poly_col <- rev(poly_col)#
+        } else {#
+            poly_col <- col[-1]#
+            poly_col <- rev(poly_col)#
+        }#
+        ## Add the quantiles#
+        if(type == "polygon") {#
+            for (point in 1:points_n) {#
+                for(cis in 1:quantiles_n) {#
+                    ## Setting X#
+                    x_vals <- c(point-width/(quantiles_n - cis + 1.5), point+width/(quantiles_n - cis + 1.5), point+width/(quantiles_n - cis + 1.5), point-width/(quantiles_n - cis + 1.5)) + shift#
+                    ## Setting Y#
+                    y_vals <- c(rep(extract.from.summary(summarised_data, ifelse(is_bootstrapped, 4, 3) + cis, rarefaction)[point], 2),#
+                              rep(extract.from.summary(summarised_data, (ifelse(is_bootstrapped, 4, 3) + quantiles_n*2) - (cis - 1), rarefaction)[point], 2)#
+                              )#
+                    ## Plotting the box#
+                    polygon(x_vals, y_vals, col = poly_col[[cis]], border = col[[1]], density)#
+#
+                }#
+            }#
+        }#
+        if(type == "line") {#
+            for (point in 1:points_n) {#
+                for(cis in 1:quantiles_n) {#
+                    ## Setting Y#
+                    y_vals<-c(extract.from.summary(summarised_data, ifelse(is_bootstrapped, 4, 3) + cis, rarefaction)[point],#
+                              extract.from.summary(summarised_data, (ifelse(is_bootstrapped, 4, 3) + quantiles_n*2) - (cis - 1), rarefaction)[point])#
+                    ## Plotting the box#
+                    lines(x = rep((point + shift), 2), y = y_vals, lty = (quantiles_n - cis + 1), lwd = cis * 1.5, col = col[[1]])#
+#
+                }#
+            }#
+        }#
+        ## Add the points estimates#
+        points(1:points_n + shift, extract.from.summary(summarised_data, ifelse(is_bootstrapped, 4, 3), rarefaction), col = col[[1]], pch = 19)#
+    } else {#
+        ## Add the points estimates#
+        points(1:points_n + shift, extract.from.summary(summarised_data, 3, rarefaction), col = col[[1]], pch = 19)#
+    }#
+    if(observed == TRUE) {#
+        ## Add the points observed (if existing)#
+        points(1:points_n + shift, extract.from.summary(summarised_data, 3, rarefaction = FALSE), col = col[[1]], pch = 4)#
+    }#
+#
+    ## Save parameters#
+    return(par())#
+}
+plot.discrete(summarised_data, rarefaction, is_bootstrapped, type, ylim, xlab, ylab, col, observed, add, density) ; warning("DEBUG: plot")
+add
+#' @title dispRity object plotting#
+#'#
+#' @description Plots a \code{dispRity} object.#
+#'#
+#' @param x A \code{dispRity} object.#
+#' @param ... Any optional arguments to be passed to \code{\link[graphics]{plot}}.#
+#' @param type Either \code{"continuous"} (\code{"c"}), \code{"box"} (\code{"b"}), \code{"line"} (\code{"l"}) or \code{"polygon"} (\code{"p"}). When unspecified, is set to \code{"continuous"} if \code{\link{chrono.subsets}} is used with \code{method = "continuous"}, else is set to \code{"box"}. See details.#
+#' @param quantiles The quantiles to display (default is \code{quantiles = c(50, 95)}; is ignored if the \code{dispRity} object is not bootstrapped).#
+#' @param cent.tend A function for summarising the bootstrapped disparity values (default is \code{\link[stats]{median}}).#
+#' @param rarefaction Either \code{NULL} (default) or \code{FALSE} for not using the rarefaction scores; a \code{numeric} value of the level of rarefaction to plot; or \code{TRUE} for plotting the rarefaction curves.#
+#' @param elements \code{logical} whether to plot the number of elements per subsets.#
+#' @param ylim Optional, two \code{numeric} values for the range of the y axis.#
+#' @param xlab Optional, a \code{character} string for the caption of the x axis.#
+#' @param ylab Optional, one or two (if \code{elements = TRUE}) \code{character} string(s) for the caption of the y axis.#
+#' @param col Optional, some \code{character} string(s) for the colour of the graph.#
+#' @param chrono.subsets \code{logical} whether to handle continuous data from the \code{chrono.subsets} function as time (in Ma). When this option is set to TRUE for other \code{type} options, the names of the subsets are used for the x axis labels.#
+#' @param observed \code{logical} whether to add the observed values on the plot as crosses (default is \code{FALSE}).#
+#' @param add \code{logical} whether to add the new plot an existing one (default is \code{FALSE}).#
+#' @param density the density of shading lines to be passed to \code{\link[graphics]{polygon}}. Is ignored if \code{type = "box"} or \code{type = "line"}.#
+#' @param element.pch optional, if \code{elements = TRUE}, the point type to represent them (default are squares: \code{element.pch = 15})#
+# ' @param significance when plotting a \code{\link{sequential.test}} from a distribution, which data to use for considering slope significance. Can be either \code{"cent.tend"} for using the central tendency or a \code{numeric} value corresponding to which quantile to use (e.g. \code{significance = 4} will use the 4th quantile for the level of significance ; default = \code{"cent.tend"}).#
+# ' @param lines.args when plotting a \code{\link{sequential.test}}, a list of arguments to pass to \code{\link[graphics]{lines}} (default = \code{NULL}).#
+# ' @param token.args when plotting a \code{\link{sequential.test}}, a list of arguments to pass to \code{\link[graphics]{text}} for plotting tokens (see details; default = \code{NULL}).#
+#' @param nclass when plotting a \code{\link{null.test}} the number of \code{nclass} argument to be passed to \code{\link[graphics]{hist}} (default = \code{10}).#
+#' @param coeff when plotting a \code{\link{null.test}} the coefficient for the magnitude of the graph (see \code{\link[ade4]{randtest}}; default = \code{1}).#
+#'#
+#' @details#
+#' The different \code{type} arguments are:#
+#' \itemize{#
+#'   \item \code{"continuous"}: plots the results as a continuous line.#
+#'   \item \code{"box"}: plots the results as discrete box plots (note that this option ignores the user set quantiles and central tendency).#
+#'   \item \code{"line"}: plots the results as discrete vertical lines with the user's set quantiles and central tendency.#
+#'   \item \code{"polygon"}: identical as \code{"line"} but using polygons rather than vertical lines.#
+#' }#
+#' #
+#TG: The following is from sequential.test (not implemented yet)#
+# The \code{token.args} argument intakes a list of arguments to be passed to \code{\link[graphics]{text}} for plotting the significance tokens. The plotted tokens are the standard p-value significance tokens from R:#
+# \code{0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1}#
+# Additionally, the \code{float} argument can be used for setting the height of the tokens compared to the slopes. For example one can use \code{token.args = list(float = 0.3, col = "blue", cex = 0.5))} for plotting blue tokens 50% smaller than normal and 30% higher than the slope.#
+#'#
+#' @examples#
+#' ## Load the disparity data based on Beck & Lee 2014#
+#' data(disparity)#
+#' #
+#' ## Discrete plotting#
+#' plot(disparity, type = "box")#
+#' #
+#' ## Using polygons rather than boxes (quantiles and central tendency can be#
+#' ## set by the user)#
+#' plot(disparity, type = "polygon", quantiles = c(10, 50, 95),#
+#'      cent.tend = mean)#
+#' #
+#' ## Using different options#
+#' plot(disparity, type = "line", elements = TRUE, ylim = c(0, 5),#
+#'      xlab = ("Time (Ma)"), ylab = "disparity")#
+#' #
+#' ## Continuous plotting (all default options)#
+#' plot(disparity, type = "continuous")#
+#' #
+#' ## Using different options (with non time.slicing option)#
+#' plot(disparity, type = "continuous", chrono.subsets = FALSE,#
+#'      elements = TRUE, col = c("red", "orange", "yellow"))#
+#' #
+#' ## Rarefactions plots#
+#' plot(disparity, rarefaction = TRUE)#
+#' #
+#' \dontrun{#
+#' ## Geoscale plots#
+#' require(geoscale)#
+#' #
+#' ## Converting the data into a list#
+#' data_obs <- extract.dispRity(disparity, observed = TRUE)#
+#' data_distribution <- extract.dispRity(disparity, observed = FALSE)#
+#' ## Removing one list level#
+#' data_distribution <- unlist(data_distribution, recursive = FALSE)#
+#' data_obs <- as.vector(data_obs)#
+#' #
+#' ## Getting the ages#
+#' ages <- as.numeric(names(disparity$subsets))#
+#' #
+#' ## Plotting the results median#
+#' geoscalePlot(ages, data_obs, boxes = "Age", data.lim = c(1.5, 2), type = "l")#
+#'#
+#' ## Plotting the results distribution#
+#' geoscaleBox(data_distribution, ages, boxes = "Age", data.lim = c(1.5, 2))#
+#' }#
+#' #
+#' #
+#' @seealso \code{\link{dispRity}}, \code{\link{summary.dispRity}}, \code{\link{pair.plot}}.#
+#'#
+#' @author Thomas Guillerme#
+#
+#Testing#
+# source("sanitizing.R")#
+# source("plot.dispRity_fun.R")#
+# data(BeckLee_mat50)#
+# groups <- as.data.frame(matrix(data = c(rep(1, 12), rep(2, 13), rep(3, 12), rep(4, 13)), dimnames = list(rownames(BeckLee_mat50))), ncol = 1)#
+# customised_subsets <- custom.subsets(BeckLee_mat50, groups)#
+# bootstrapped_data <- boot.matrix(customised_subsets, bootstraps = 3)#
+# sum_of_variances <- dispRity(bootstrapped_data, metric =  variances)#
+# subsets <- extract.dispRity(sum_of_variances, observed = FALSE, keep.structure = TRUE, concatenate = FALSE)#
+# data <- sequential.test(subsets, family = gaussian, correction = "hommel")#
+# data <- sum_of_variances#
+# quantiles=c(50, 95)#
+# cent.tend=median#
+# rarefaction = NULL#
+# elements = FALSE#
+# chrono.subsets = FALSE#
+# observed = FALSE#
+# add = FALSE#
+# density = NULL#
+# nclass = 10#
+# coeff = 1#
+# significance="cent.tend"#
+# lines.args=NULL#
+# token.args=NULL#
+#
+# data(disparity)#
+# data <- dispRity#
+# type = "line"#
+# elements = TRUE#
+# ylim = c(0, 5)#
+# xlab = ("Time (Ma)")#
+# ylab = "disparity"#
+#
+plot.dispRity <- function(x, ..., type, quantiles = c(50, 95), cent.tend = median, rarefaction = NULL, elements = FALSE, ylim, xlab, ylab, col, chrono.subsets = TRUE, observed = FALSE, add = FALSE, density = NULL, element.pch = 15, nclass = 10, coeff = 1){ #significance="cent.tend", lines.args=NULL, token.args=NULL#
+#
+    data <- x#
+    match_call <- match.call()#
+#
+    #SANITIZING#
+    #DATA#
+    if(length(class(data)) > 1) {#
+#
+        ## Subclass plots#
+#
+        ## randtests plots#
+        if(class(data)[[1]] == "dispRity" && class(data)[[2]] == "randtest") {#
+            ## sanitising#
+            check.class(nclass, "numeric")#
+            check.class(coeff, "numeric")#
+            check.length(nclass, 1, " must be a single numeric value.")#
+            check.length(coeff, 1, " must be a single numeric value.")#
+            ## length_data variable initialisation#
+            length_data <- length(data)#
+            ## Set up the plotting window#
+            ## Open the multiple plots#
+            if(length_data != 1) {#
+                op_tmp <- par(mfrow = c(ceiling(sqrt(length_data)), round(sqrt(length_data))))#
+#
+                ## Rarefaction plots#
+                for(model in 1:length_data) {#
+                    plot.randtest(data[[model]], nclass = nclass, coeff = coeff, main = paste("MC test for subsets ", names(data)[[model]], sep = ""), ...)#
+                    ## plot.randtest(data[[model]], nclass = nclass, coeff = coeff, main = paste("MC test for subsets ", names(data)[[model]], sep = "")) ; warning("DEBUG: plot")#
+                }#
+                par(op_tmp)#
+            } else {#
+                plot.randtest(data[[1]], nclass = nclass, coeff = coeff, ...)#
+                ## plot.randtest(data[[model]], nclass = nclass, coeff = coeff) ; warning("DEBUG: plot")#
+            }#
+        }#
+#
+        ## dtt plots (from https://github.com/mwpennell/geiger-v2/blob/master/R/disparity.R)#
+        if(class(data)[[1]] == "dispRity" && class(data)[[2]] == "dtt") {#
+#
+            ## Silence warnings#
+            options(warn = -1)#
+#
+            ## Get the ylim#
+            if(missing(ylim)) {#
+                ylim <- c(range(pretty(data$dtt)))#
+#
+                if(!is.null(data$sim)) {#
+                    ylim_sim <- range(data$sim)#
+                    ylim <- range(c(ylim, ylim_sim))#
+                }#
+            }#
+#
+            if(missing(xlab)) {#
+                xlab <- "relative time"#
+            }#
+            if(missing(ylab)) {#
+                ylab <- "scaled disparity"#
+            }#
+#
+            if(missing(col)) {#
+                colfun <- grDevices::colorRampPalette(c("lightgrey", "grey"))#
+                col <- c("black", colfun(length(quantiles)))#
+            }#
+#
+            ## Plot the relative disparity curve#
+            plot(data$times, data$dtt, xlab = xlab, ylab = ylab, ylim = ylim, type = "n", ...)#
+            #plot(data$times, data$dtt, xlab = xlab, ylab = ylab, ylim = ylim, type = "n") ; warning("DEBUG plot")#
+#
+            if(!is.null(data$sim)) {#
+#
+                ## Check the quantiles#
+                check.class(quantiles, "numeric", " must be any value between 1 and 100.")#
+                ## Are quantiles probabilities or proportions ?#
+                if(any(quantiles < 1)) {#
+                    ## Transform into proportion#
+                    quantiles <- quantiles*100#
+                }#
+                ## Are quantiles proper proportions#
+                if(any(quantiles < 0) | any(quantiles > 100)) {#
+                    stop("quantiles(s) must be any value between 0 and 100.", call. = FALSE)#
+                }#
+                quantiles_n <- length(quantiles)#
+#
+                ## Check the central tendency#
+                check.class(cent.tend, "function")#
+                ## The function must work#
+                if(make.metric(cent.tend, silent = TRUE) != "level1") {#
+                    stop("cent.tend argument must be a function that outputs a single numeric value.", call. = FALSE)#
+                }#
+                ## Summarised data#
+                quantiles_values <- apply(data$sim, 1, quantile, probs = CI.converter(quantiles))#
+                cent_tend_values <- apply(data$sim, 1, cent.tend)#
+#
+                ## Plotting the polygons for each quantile#
+                for (cis in 1:quantiles_n) {#
+                    xx <- c(data$times, rev(data$times))#
+                    yy <- c(quantiles_values[(quantiles_n*2) - (cis-1), ], rev(quantiles_values[cis ,]))#
+                    polygon(xx, yy, col = col[cis+1],  border = FALSE, density = density)#
+                }#
+                ## Add the central tendency#
+                lines(data$times, cent_tend_values, col = col[1], lty = 2)#
+            }#
+#
+            ## Add the observed disparity#
+            lines(data$times, data$dtt, col = col[1], lwd = 1.5)#
+#
+            ## Re-enable warnings#
+            options(warn = 0)#
+        } #
+#
+        if(class(data)[[1]] == "dispRity" && class(data)[[2]] == "model.test") {#
+#
+            ## Colours#
+            if(missing(col)) {#
+                col <- "grey"#
+            }#
+            ## Ylab#
+            if(missing(ylab)) {#
+                ylab <- "weighted AIC"#
+            }#
+#
+            ## Ylim#
+            if(missing(ylim)) {#
+                ylim <- NULL#
+            }#
+#
+            ## Plotting the model support#
+            plot.model.test.support(data = data, col = col, ylab = ylab, ylim = ylim, ...)#
+        }#
+        if(class(data)[[1]] == "dispRity" && class(data)[[2]] == "model.sim") {#
+            ## xlab#
+            if(missing(xlab)) { #
+                xlab <- "default"#
+            } #
+#
+            ## ylab#
+            if(missing(ylab)) {#
+                ylab <- "default"#
+            }#
+#
+            ## col#
+            if(missing(col)) {#
+                col <- "default"#
+            }#
+            ## ylim#
+            if(missing(ylim)) {#
+                ylim <- "default"#
+            }#
+#
+            ## add#
+            check.class(add, "logical")#
+#
+            ## density#
+            if(!is.null(density)) {#
+                check.class(density, "numeric")#
+                check.length(density, 1, " must be a single numeric value.")#
+            }#
+#
+            ## Preparing the data and the arguments#
+            summarised_data <- data.frame(summary.dispRity(data, quantiles = quantiles, cent.tend = cent.tend, digits = 5))#
+            colnames(summarised_data)[3] <- "obs"#
+#
+            ## Setting the default arguments#
+            default_arg <- set.default(summarised_data, data, elements = FALSE, ylim = ylim, xlab = xlab, ylab = ylab, col = col, rarefaction = FALSE, type = "continuous", is_bootstrapped = TRUE)#
+            ylim <- default_arg[[1]]#
+            xlab <- default_arg[[2]]#
+            ylab <- default_arg[[3]]#
+            if(length(ylab) == 0) {#
+                ylab <- "disparity (simulated)"#
+            }#
+            col <- default_arg[[4]]#
+#
+            ## Plotting the model#
+            plot_details <- plot.continuous(summarised_data, rarefaction = FALSE, is_bootstrapped = TRUE, is_distribution = TRUE, ylim, xlab, ylab, col, time_slicing = summarised_data$subsets, observed = FALSE, add, density, ...)#
+        }#
+        ## Exit subclass plots#
+        return(invisible())#
+    }#
+#
+    ## ----#
+    ## Normal disparity plot#
+    ## ----#
+#
+    ## must be class dispRity#
+    check.class(data, "dispRity")#
+    ## must have one element called dispRity#
+    if(is.na(match("disparity", names(data)))) stop(paste0(as.expression(match_call$x), " must be contain disparity data.\nTry running dispRity(", as.expression(match_call$x), ", ...)"), call. = FALSE)#
+    ## Check if disparity is a value or a distribution#
+    is_distribution <- ifelse(length(data$disparity[[1]]$elements) != 1, TRUE, FALSE)#
+    ## Check the bootstraps#
+    is_bootstrapped <- ifelse(!is.null(data$call$bootstrap), TRUE, FALSE)#
+#
+    ## quantiles#
+    ## Only check if the data is_bootstrapped#
+    if(is_bootstrapped) {#
+        check.class(quantiles, "numeric", " must be any value between 1 and 100.")#
+#
+        ## Are quantiles probabilities or proportions ?#
+        if(any(quantiles < 1)) {#
+            ## Transform into proportion#
+            quantiles <- quantiles*100#
+        }#
+        ## Are quantiles proper proportions#
+        if(any(quantiles < 0) | any(quantiles > 100)) {#
+            stop("quantiles(s) must be any value between 0 and 100.", call. = FALSE)#
+        }#
+    }#
+#
+    ## cent.tend#
+    ## Must be a function#
+    check.class(cent.tend, "function")#
+    ## The function must work#
+    if(make.metric(cent.tend, silent = TRUE) != "level1") {#
+        stop("cent.tend argument must be a function that outputs a single numeric value.", call. = FALSE)#
+    }#
+#
+    ## type#
+    # if(length(data$subsets) == 1) {#
+    #     type <- "box"#
+    #     message("Only one subset of data available: type is set to \"box\".")#
+    # }#
+#
+    if(missing(type)) {#
+        ## Set type to default#
+        if(any(grep("continuous", data$call$subsets))) {#
+            type <- "continuous"#
+        } else {#
+            type <- "box"#
+        }#
+    } else {#
+        ## type must be either "discrete", "d", "continuous", or "c"#
+        all_types <- c("continuous", "c", "box", "b", "line", "l", "polygon", "p")#
+        ## type must be a character string#
+        check.class(type, "character")#
+        type <- tolower(type)#
+        ## type must have only one element#
+        check.length(type, 1, paste(" argument must only one of the following:\n", paste(all_types, collapse=", "), ".", sep=""))#
+        check.method(type, all_types, "type argument")#
+        ## if type is a letter change it to the full word (lazy people...)#
+        type <- ifelse(type == "c", "continuous", type)#
+        type <- ifelse(type == "b", "box", type)#
+        type <- ifelse(type == "l", "line", type)#
+        type <- ifelse(type == "p", "polygon", type)#
+    }#
+#
+    ## If continuous, set time to continuous Ma (default)#
+    if(type == "continuous" & chrono.subsets) {#
+        ## Check if time.slicing was used (saved in call)#
+        if(data$call$subsets[1] == "continuous") {#
+            time_slicing <- names(data$subsets)#
+        }#
+    } #
+    if(!chrono.subsets) {#
+        time_slicing <- FALSE#
+    } else {#
+        time_slicing <- names(data$subsets)#
+    }#
+#
+    ## elements#
+    ## must be logical#
+    check.class(elements, "logical")#
+#
+    ## Rarefaction#
+    if(is.null(rarefaction)) {#
+        rarefaction <- FALSE#
+    }#
+    ## If data is not bootstrapped, rarefaction is FALSE#
+    if(!is_bootstrapped) {#
+        rarefaction <- FALSE#
+    }#
+    ## Check class#
+    silent <- check.class(rarefaction, c("logical", "integer", "numeric"))#
+    if(class(rarefaction) != "logical") {#
+        ## Right class#
+        rarefaction <- as.numeric(rarefaction)#
+        check.length(rarefaction, 1, errorif = FALSE, msg = "Rarefaction must a single numeric value.")#
+        ## Check if all subsets have the appropriate rarefaction level#
+        rarefaction_subsets <- lapply(lapply(data$subsets, lapply, nrow), function(X) which(X[-1] == rarefaction)+1)#
+        ## Check if subsets have no rarefaction#
+        if(length(unlist(rarefaction_subsets)) != length(data$subsets)) {#
+            wrong_rarefaction <- lapply(rarefaction_subsets, function(X) ifelse(length(X) == 0, TRUE, FALSE))#
+            stop(paste("The following subsets do not contain ", rarefaction, " elements: ", paste(names(data$subsets)[unlist(wrong_rarefaction)], collapse = ", "), ".", sep = "" ))#
+        }#
+    }#
+#
+    ## observed#
+    check.class(observed, "logical")#
+#
+    ## xlab#
+    if(missing(xlab)) { #
+        xlab <- "default"#
+        if(!is.null(data$call$subsets) && data$call$subsets != "customised" && chrono.subsets != FALSE && rarefaction != TRUE) {#
+            xlab <- "Time (Mya)"#
+        }#
+    } else {#
+        ## length must be 1#
+        check.length(xlab, 1, " must be a character string.")#
+    }#
+#
+    ## ylab#
+    if(missing(ylab)) {#
+        ylab <- "default"#
+    } else {#
+        ## length must be #
+        if(elements == FALSE) {#
+            check.length(ylab, 1, " must be a character string.")#
+        } else {#
+            if(length(ylab) > 2) stop("ylab can have maximum of two elements.", call. = FALSE)#
+        }#
+    }#
+#
+    ## col#
+    ## if default, is ok#
+    if(missing(col)) {#
+        if(type == "box" & rarefaction != TRUE) {#
+            col <- "white"#
+        } else {#
+            col <- "default"#
+        }#
+    } else {#
+        check.class(col, "character", " must be a character string.")#
+    }#
+#
+    ## ylim#
+    if(missing(ylim)) {#
+        ylim <- "default"#
+    } else {#
+        check.class(ylim, "numeric")#
+        check.length(ylim, 2, " must be a vector of two elements.")#
+    }#
+#
+    ## add#
+    check.class(add, "logical")#
+#
+    ## density#
+    if(type == "continuous" || type == "polygon") {#
+        if(!is.null(density)) {#
+            check.class(density, "numeric")#
+            check.length(density, 1, " must be a single numeric value.")#
+        }#
+    }#
+#
+    ## PREPARING THE PLOT#
+#
+    ## summarising the data#
+    summarised_data <- summary.dispRity(data, quantiles = quantiles, cent.tend = cent.tend, digits = 5)#
+#
+    ## Setting the default arguments#
+    default_arg <- set.default(summarised_data, data, elements = elements, ylim = ylim, xlab = xlab, ylab = ylab, col = col, rarefaction = rarefaction, type = type, is_bootstrapped = is_bootstrapped)#
+    ylim <- default_arg[[1]]#
+    xlab <- default_arg[[2]]#
+    ylab <- default_arg[[3]]#
+    col <- default_arg[[4]]#
+#
+    ## PLOTTING THE RESULTS#
+#
+    ## Rarefaction plot#
+    if(rarefaction == TRUE) {#
+        ## How many rarefaction plots?#
+        n_plots <- length(data$subsets)#
+#
+        ## Open the multiple plots#
+        op_tmp <- par(mfrow = c(ceiling(sqrt(n_plots)),round(sqrt(n_plots))))#
+#
+        ## Rarefaction plots#
+#
+        ## Get the list of subsets#
+        subsets_levels <- unique(summarised_data$subsets)#
+#
+        ## Split the summary table#
+        sub_summarised_data <- lapply(as.list(subsets_levels), split.summary.data, summarised_data)#
+#
+        ## Plot the rarefaction curves#
+        for(nPlot in 1:n_plots) {#
+            plot.rarefaction(sub_summarised_data[[nPlot]], ylim, xlab, ylab, col, ...)#
+            # plot.rarefaction(sub_summarised_data[[nPlot]], ylim, xlab, ylab, col) ; warning("DEBUG: plot")#
+        }#
+#
+        ## Done!#
+        par(op_tmp)#
+#
+        return(invisible())#
+    }#
+#
+    ## Continuous plot#
+    if(type == "continuous") {#
+        ## Bigger plot margins if elements needed#
+        if(elements) {#
+            par(mar = c(5, 4, 4, 4) + 0.1)#
+        }#
+        saved_par <- plot.continuous(summarised_data, rarefaction, is_bootstrapped, is_distribution, ylim, xlab, ylab, col, time_slicing, observed, add, density,...)#
+        # saved_par <- plot.continuous(summarised_data, rarefaction, is_bootstrapped, ylim, xlab, ylab, col, time_slicing, observed, add, density) ; warning("DEBUG: plot")#
+        if(elements) {#
+            par(new = TRUE)#
+            plot.elements(summarised_data, rarefaction, ylab = ylab, col = col[[1]], type = "continuous", div.log = FALSE, cex.lab = saved_par$cex.lab, element.pch = element.pch)#
+        }#
+        return(invisible())#
+    }#
+#
+    ## Polygons or lines#
+    if(type == "polygon" | type == "line") {#
+        ## Bigger plot margins if elements needed#
+        if(elements) {#
+            par(mar = c(5, 4, 4, 4) + 0.1)#
+        }#
+        ## Personalised discrete plots#
+        saved_par <- plot.discrete(summarised_data, rarefaction, is_bootstrapped, is_distribution, type, ylim, xlab, ylab, col, observed, add, density, ...) #
+        # saved_par <- plot.discrete(summarised_data, rarefaction, is_bootstrapped, type, ylim, xlab, ylab, col, observed, add, density) ; warning("DEBUG: plot")#
+        if(elements) {#
+            par(new = TRUE)#
+            plot.elements(summarised_data, rarefaction, ylab = ylab, col = col[[1]], type = "discrete", div.log = FALSE, cex.lab = saved_par$cex.lab, element.pch = element.pch)#
+        }#
+        return(invisible())#
+    }#
+#
+    ## Box plot#
+    if(type == "box") {#
+        ## Simple case: boxplot#
+        plot_data <- transpose.box(data, rarefaction, is_bootstrapped)#
+        ## Bigger plot margins if elements needed#
+        if(elements) {#
+            par(mar = c(5, 4, 4, 4) + 0.1)#
+        }#
+        saved_par <- boxplot(plot_data, ylim = ylim, xlab = xlab, ylab = ylab[[1]], col = col, add = add, ...)#
+        # saved_par <- boxplot(plot_data, ylim = ylim, xlab = xlab, ylab = ylab[[1]], col = col, add = add) ; warning("DEBUG: plot")#
+#
+        if(observed == TRUE) {#
+            if(any(!is.na(extract.from.summary(summarised_data, 3, rarefaction)))){#
+                ## Add the points observed (if existing)#
+                for(point in 1:length(plot_data)) {#
+                    x_coord <- point#
+                    y_coord <- extract.from.summary(summarised_data, 3, rarefaction)[point]#
+                    points(x_coord, y_coord, pch = 4, col = "black")#
+                }#
+            }#
+        }#
+        if(elements) {#
+            par(new = TRUE)#
+            plot.elements(summarised_data, rarefaction, ylab = ylab, col = col[[1]], type = "discrete", div.log = FALSE, cex.lab = saved_par$cex.lab, element.pch = element.pch)#
+        }#
+#
+        return(invisible())#
+    }#
+#
+}
+plot(disparity, rarefaction = 5, type = "l")
+plot(disparity, rarefaction = 10, type = "l", add = TRUE, shift = 0.5)
+plot(disparity, rarefaction = 10, type = "b", add = TRUE, shift = 0.5)
+## default settings#
+set.default <- function(summarised_data, data, elements, ylim, xlab, ylab, col, rarefaction, type = FALSE, is_bootstrapped) {#
+#
+    ## ylim#
+    if(ylim[[1]] == "default") {#
+        ## Setting the ylim to min/max -/+ 5%.#
+        if(rarefaction != TRUE) {#
+            ylim <- c(min(summarised_data[, -c(1:2)], na.rm = TRUE) - min(summarised_data[, -c(1:2)], na.rm = TRUE) * 0.02 , max(summarised_data[, -c(1:2)], na.rm = TRUE) + max(summarised_data[, -c(1:2)], na.rm = TRUE) * 0.02)#
+        } else {#
+            ylim <- "rarefaction"#
+        }#
+    }#
+#
+    ## xlab#
+    if(xlab == "default") {#
+        if(rarefaction == TRUE) {#
+            xlab <- "Elements"#
+        } else {#
+            xlab <- "Subsets"#
+        }#
+    }#
+    ## ylab#
+    if(ylab[[1]] == "default") {#
+        ylab <- as.character(data$call$disparity$metrics)#
+        if(elements == TRUE) {#
+            ylab[2] <- "Elements"#
+        }#
+    }#
+#
+    ## col#
+    if(col[[1]] == "default") {#
+        col <- "black"#
+        ## If any quantiles add, grey colours#
+        if(ncol(summarised_data) > 3) {#
+            quantiles_n <- (ncol(summarised_data) - ifelse(is_bootstrapped, 4, 3))/2#
+            colfun <- grDevices::colorRampPalette(c("grey", "lightgrey"))#
+            col <- c(col, colfun(quantiles_n))#
+        }#
+    } else {#
+        if(type != "box") {#
+            quantiles_n <- ncol(summarised_data[, -c(1:ifelse(is_bootstrapped, 4, 3))])/2#
+            cols_missing <- (quantiles_n + 1) - length(col)#
+            if(cols_missing > 0) {#
+                colfun <- grDevices::colorRampPalette(c("grey", "lightgrey"))#
+                col <- c(col, colfun(cols_missing))#
+            }#
+        }#
+    }#
+#
+    return(list(ylim, xlab, ylab, col))#
+}#
+#
+## Extract specific summary values#
+### summarised_data is a summary data table#
+### what is the column of the table (or, if "rows", the rows numbers)#
+### rarefaction is the rarefaction value (FALSE == none)#
+extract.from.summary <- function(summarised_data, what, rarefaction = FALSE) {#
+#
+    ## Internal function for checking true NAs#
+    check.na <- function(row, extract, summarised_data) {#
+        if(!extract[row]) {#
+            extract[row] <- ifelse(all(is.na(summarised_data[row,-c(1,2)])), TRUE, FALSE)#
+        }#
+        return(extract[row])#
+    }#
+#
+    ## No rarefaction level#
+    if(!rarefaction) {#
+        ## Values to extract#
+        extract <- !is.na(summarised_data$obs)#
+        ## Check if any of the values to extract are NAs from rarefaction or from missing data#
+        if(any(!extract)) {#
+            extract <- sapply(1:nrow(summarised_data), check.na, extract, summarised_data)#
+        }#
+#
+        if(what != "rows") {#
+            return(summarised_data[which(extract), what])#
+        } else {#
+            return(which(extract))#
+        }#
+    } else {#
+        ## Rarefaction level#
+        if(!(what == "rows")) {#
+            return(summarised_data[which(summarised_data$n == rarefaction), what])#
+        } else {#
+            return(which(summarised_data$n == rarefaction))#
+        }#
+    }#
+}#
+#
+## discrete plotting#
+plot.discrete <- function(summarised_data, rarefaction, is_bootstrapped, is_distribution, type, ylim, xlab, ylab, col, observed, add, density, ...) {#
+    ## How many points?#
+    points_n <- length(unique(summarised_data$subsets))#
+#
+    ## dummy matrix (for getting the nice boxplots split + column names)#
+    dummy_mat <- matrix(1:points_n, ncol = points_n)#
+    colnames(dummy_mat) <- extract.from.summary(summarised_data, 1)#
+#
+    ## Empty plot#
+    if(!add) {#
+        boxplot(dummy_mat, col = "white", border = "white", ylim = ylim, ylab = ylab[[1]], xlab = xlab, boxwex = 0.001,, type = "n", ...)#
+        #boxplot(dummy_mat, col = "white", border = "white", ylim = ylim, ylab = ylab[[1]], xlab = xlab, boxwex = 0.001, type = "n") ; warning("DEBUG: plot")#
+    }#
+#
+    ## Set the shift parameter (for add)#
+    shift = 0#
+    if(add) {#
+        ## Is the previous plot the same size?#
+        prev_axis <- par("xaxp")#
+        if(prev_axis[2] == points_n) {#
+            shift = 0.5#
+        } else {#
+            shift = 0.5#
+        }#
+    }#
+#
+    ## Check if bootstrapped#
+    if(is_bootstrapped || is_distribution) {#
+        ## How many quantiles?#
+        quantiles_n <- (ncol(summarised_data) - ifelse(is_bootstrapped, 4, 3))/2#
+#
+        ## Set the width (default)#
+        width <- 0.5 #points_n/(points_n*2)#
+#
+        ## Set the colours#
+        if(length(col) < (quantiles_n + 1)) {#
+            cols_missing <- (quantiles_n + 1) - length(col)#
+            colfun <- colorRampPalette(c("grey", "lightgrey"))#
+            col_tmp <- c(col, colfun(cols_missing))#
+            poly_col <- col_tmp[-1]#
+            poly_col <- rev(poly_col)#
+        } else {#
+            poly_col <- col[-1]#
+            poly_col <- rev(poly_col)#
+        }#
+        ## Add the quantiles#
+        if(type == "polygon") {#
+            for (point in 1:points_n) {#
+                for(cis in 1:quantiles_n) {#
+                    ## Setting X#
+                    x_vals <- c(point-width/(quantiles_n - cis + 1.5), point+width/(quantiles_n - cis + 1.5), point+width/(quantiles_n - cis + 1.5), point-width/(quantiles_n - cis + 1.5)) + shift#
+                    ## Setting Y#
+                    y_vals <- c(rep(extract.from.summary(summarised_data, ifelse(is_bootstrapped, 4, 3) + cis, rarefaction)[point], 2),#
+                              rep(extract.from.summary(summarised_data, (ifelse(is_bootstrapped, 4, 3) + quantiles_n*2) - (cis - 1), rarefaction)[point], 2)#
+                              )#
+                    ## Plotting the box#
+                    polygon(x_vals, y_vals, col = poly_col[[cis]], border = col[[1]], density)#
+#
+                }#
+            }#
+        }#
+        if(type == "line") {#
+            for (point in 1:points_n) {#
+                for(cis in 1:quantiles_n) {#
+                    ## Setting Y#
+                    y_vals<-c(extract.from.summary(summarised_data, ifelse(is_bootstrapped, 4, 3) + cis, rarefaction)[point],#
+                              extract.from.summary(summarised_data, (ifelse(is_bootstrapped, 4, 3) + quantiles_n*2) - (cis - 1), rarefaction)[point])#
+                    ## Plotting the box#
+                    lines(x = rep((point + shift), 2), y = y_vals, lty = (quantiles_n - cis + 1), lwd = cis * 1.5, col = col[[1]])#
+#
+                }#
+            }#
+        }#
+        ## Add the points estimates#
+        points(1:points_n + shift, extract.from.summary(summarised_data, ifelse(is_bootstrapped, 4, 3), rarefaction), col = col[[1]], pch = 19)#
+    } else {#
+        ## Add the points estimates#
+        points(1:points_n + shift, extract.from.summary(summarised_data, 3, rarefaction), col = col[[1]], pch = 19)#
+    }#
+    if(observed == TRUE) {#
+        ## Add the points observed (if existing)#
+        points(1:points_n + shift, extract.from.summary(summarised_data, 3, rarefaction = FALSE), col = col[[1]], pch = 4)#
+    }#
+#
+    ## Save parameters#
+    return(par())#
+}#
+#
+## continuous plotting#
+plot.continuous <- function(summarised_data, rarefaction, is_bootstrapped, is_distribution, ylim, xlab, ylab, col, time_slicing, observed, add, density, ...) {#
+    ## How many points?#
+    points_n <- length(unique(summarised_data$subsets))#
+#
+    ## Set the shift parameter (for add)#
+    shift = 0#
+    if(add) {#
+        ## Is the previous plot the same size?#
+        prev_axis <- par("xaxp")#
+        if(prev_axis[2] == points_n) {#
+            shift = 0#
+        } else {#
+            shift = 0.5#
+        }#
+    }#
+#
+    ## Plot the central tendency#
+    if(add == FALSE) {#
+        if(time_slicing[1] == FALSE) {#
+            ## Plot with standard xaxis#
+            plot((seq(from = 1, to = points_n)-shift), extract.from.summary(summarised_data, ifelse(is_bootstrapped, 4, 3), rarefaction), type = "l", ylim = ylim, col = col[[1]], xlab = xlab, ylab = ylab[[1]], ...)#
+            #plot((seq(from = 1, to = points_n)-shift), extract.from.summary(summarised_data, ifelse(is_bootstrapped, 4, 3), rarefaction), type = "l", ylim = ylim, col = col[[1]], xlab = xlab, ylab = ylab[[1]]) ; warning("DEBUG: plot")#
+        } else {#
+            plot((seq(from = 1, to = points_n)-shift), extract.from.summary(summarised_data, ifelse(is_bootstrapped, 4, 3), rarefaction), type = "l", ylim = ylim, col = col[[1]], xlab = xlab, ylab = ylab[[1]], xaxt = "n", ...)#
+            #plot((seq(from = 1, to = points_n)-shift), extract.from.summary(summarised_data, ifelse(is_bootstrapped, 4, 3), rarefaction), type = "l", ylim = ylim, col = col[[1]], xlab = xlab, ylab = ylab[[1]], xaxt = "n") ; warning("DEBUG: plot")#
+            axis(1, 1:points_n, time_slicing)#
+        }#
+    } else {#
+        lines(seq(from = 1, to = points_n), extract.from.summary(summarised_data, ifelse(is_bootstrapped, 4, 3), rarefaction), col = col[[1]])#
+    }#
+#
+    ## Check if bootstrapped#
+    if(is_bootstrapped || is_distribution) {#
+        ## How many quantiles?#
+        quantiles_n <- (ncol(summarised_data) - ifelse(is_bootstrapped, 4, 3))/2#
+#
+        ## Set the colours#
+        if(length(col) < (quantiles_n + 1)) {#
+            cols_missing <- (quantiles_n + 1) - length(col)#
+            colfun <- colorRampPalette(c("grey", "lightgrey"))#
+            col_tmp <- c(col, colfun(cols_missing))#
+            poly_col <- col_tmp[-1]#
+            poly_col <- rev(poly_col)#
+        } else {#
+            poly_col <- col[-1]#
+            poly_col <- rev(poly_col)#
+        }#
+#
+        ## Add the polygons#
+        for (cis in 1:quantiles_n) {#
+            x_vals <- c(1:points_n, points_n:1)#
+            y_vals <- c(extract.from.summary(summarised_data, ifelse(is_bootstrapped, 4, 3) + cis, rarefaction), rev(extract.from.summary(summarised_data, (ifelse(is_bootstrapped, 4, 3) + quantiles_n*2)-(cis-1), rarefaction)))#
+#
+            ## Dividing the polygon if NAs#
+            if(any(is.na(y_vals))) {#
+#
+                ## Check where the NAs are#
+                is_nas <- is.na(y_vals[1:points_n])#
+#
+                ## Selecting the groups of applicable data#
+                groups <- numeric()#
+                group_label <- 1#
+                for(point in 1:length(is_nas)) {#
+                    if(is.na(y_vals[point])) {#
+                        group_label <- group_label + 1#
+                        groups[point] <- NA#
+                    } else {#
+                        groups[point] <- group_label#
+                    }#
+                }#
+#
+                ## splitting the data into the groups#
+                y_vals1 <- split(y_vals[1:points_n], groups)#
+                y_vals2 <- split(y_vals[(points_n+1):(points_n*2)], rev(groups))#
+                x_vals1 <- split(x_vals[1:points_n], groups)#
+                x_vals2 <- split(x_vals[(points_n+1):(points_n*2)], rev(groups))#
+#
+                ## Merging the groups#
+                y_vals <- mapply(c, y_vals1, y_vals2, SIMPLIFY = FALSE)#
+                x_vals <- mapply(c, x_vals1, x_vals2, SIMPLIFY = FALSE)#
+#
+                ## Plotting the polygons#
+                mapply(polygon, x_vals, y_vals, MoreArgs = list(col = poly_col[[cis]], border = "NA", density = density))#
+#
+            } else {#
+                polygon(x_vals, y_vals, col = poly_col[[cis]], border = "NA", density)#
+            }#
+#
+        }#
+#
+        ## Add the central tendency on top#
+        lines(seq(from = 1, to = points_n), extract.from.summary(summarised_data, ifelse(is_bootstrapped, 4, 3), rarefaction), lty = 1, col = col[[1]])#
+#
+        ## Add the observed values on top#
+        if(observed == TRUE) {#
+            ## Add the points observed (if existing)#
+            points(1:points_n, extract.from.summary(summarised_data, 3, rarefaction = FALSE), col = col[[1]], pch = 4)#
+        }#
+    }#
+#
+    ##  Save parameters#
+    return(par())#
+}#
+#
+## Plotting elements#
+plot.elements <- function(summarised_data, rarefaction, type, ylab, col, div.log, element.pch, ...) {#
+#
+    div.log = FALSE#
+    ## Check if ylab2 exists#
+    if(length(ylab) == 1) {#
+        ylab[[2]] <- "Elements"#
+    }#
+#
+    ## Add the lines#
+    if(type == "continuous") {#
+        ## Continuous (straightforward)#
+        if(div.log == FALSE) {#
+            plot(extract.from.summary(summarised_data, 2, rarefaction), type = "l", lty = 2, xaxt = "n", yaxt = "n", xlab = "", ylab = "")#
+        } else {#
+            plot(log(extract.from.summary(summarised_data, 2, rarefaction)), type = "l", lty = 2, xaxt = "n", yaxt = "n", xlab = "", ylab = "")#
+        }#
+    } else {#
+        ## Creating the dummy data table#
+        points_n <- length(unique(summarised_data$subsets))#
+        dummy_mat <- matrix(extract.from.summary(summarised_data, 2, rarefaction), ncol = points_n)#
+        colnames(dummy_mat) <- extract.from.summary(summarised_data, 1)#
+        if(div.log == FALSE) {#
+#
+            boxplot(dummy_mat, xaxt = "n", yaxt = "n", xlab = "", ylab = "", boxwex = 0.5/points_n, lty = 2, border = "white", type = "n")#
+            for(line in 1:points_n) {#
+                # lines(c(line-0.25, (line+0.25)), rep(summarised_data[line,2], 2), lty = 2, lwd = 1.5)#
+                points(line, summarised_data[line,2], pch = element.pch, col = col)#
+            }#
+#
+        } else {#
+            boxplot(log(dummy_mat), xaxt = "n", yaxt = "n", xlab = "", ylab = "", boxwex = 0.5/points_n, lty = 2, border = "white", type = "n")#
+            for(line in 1:points_n) {#
+                points(line, log(summarised_data[line,2]), pch = element.pch, col = col)#
+                # lines(c(line-0.25, (line+0.25)), rep(log(summarised_data[line,2]), 2), lty = 2, lwd = 1.5)#
+            }#
+#
+        }#
+    }#
+    ## lines(extract.from.summary(summarised_data, 2, rarefaction), lty=2)#
+    axis(4, lty = 2)#
+    mtext(ylab[[2]], side = 4, line = 2)#
+}#
+## Splitting the summarised data table by subsets (list)#
+split.summary.data <- function(subsets_levels, summarised_data) {#
+    return(summarised_data[which(summarised_data$subsets == subsets_levels),])#
+}#
+#
+## rarefaction plottings#
+plot.rarefaction <- function(sub_data, ylim, xlab, ylab, col, main, ...) {#
+    ## Get parameters#
+    if(ylim[[1]] == "rarefaction") {#
+        ## ylim?#
+        ylim <- c(min(sub_data[, -c(1:2)], na.rm = TRUE) - min(sub_data[, -c(1:2)], na.rm = TRUE) * 0.02 , max(sub_data[, -c(1:2)], na.rm = TRUE) + max(sub_data[, -c(1:2)], na.rm = TRUE) * 0.02)#
+    }#
+    ## title?#
+    if(missing(main)) {#
+        main <- unique(as.character(sub_data$subsets))#
+    }#
+    ## how many quantiles?#
+    quantiles_n <- (ncol(sub_data) - 4)/2#
+#
+    ## colors?#
+    if(length(col) < quantiles_n) {#
+        col <- rep(col[[1]], quantiles_n + 1)#
+    }#
+#
+    ## Plot central tendency curve (continuous)#
+    # if(!missing(main)) {#
+        plot(rev(sub_data[, 4]), type = "l",  xlab = xlab, ylab = ylab[[1]], col = col[[1]], ylim = ylim, main = main, ...)#
+    # } else {#
+        # plot(rev(sub_data[,4]), type = "l",  xlab = xlab, ylab = ylab[[1]], col = col[[1]], ylim = ylim, ...)#
+    # }#
+    ## Plot the quantiles curves#
+    if(quantiles_n != 0) {#
+        for (cis in 1:quantiles_n) {#
+            ## lower quantile#
+            lines(rev(sub_data[, 4 + cis]), lty = (quantiles_n + 2 - cis), col = col[[cis + 1]])#
+            ## upper quantile#
+            lines(rev(sub_data[, ncol(sub_data) - (cis - 1)]), lty = (quantiles_n + 2- cis), col = col[[cis + 1]])#
+        }#
+    }#
+    ##  Save parameters#
+    return(par())#
+}#
+#
+## Transposing data for boxploting (taking functions from summary.dispRity)#
+transpose.box <- function(data, rarefaction, is_bootstrapped) {#
+#
+    get.rare <- function(data, rare){#
+        return(data[[rare]])#
+    }#
+#
+    if(rarefaction == FALSE) {#
+        if(is_bootstrapped) {#
+            ## Select the raw data#
+            box_data <- lapply(data$disparity, function(X) return(X[[2]]))#
+        } else {#
+            box_data <- lapply(data$disparity, function(X) return(X[[1]]))#
+        }#
+    } else {#
+        ## Select the rarefaction data#
+        rare_rows <- lapply(lapply(data$subsets, lapply, nrow), function(X) which(X[-1] == rarefaction) + 1)#
+        box_data <- mapply(get.rare, data$disparity, rare_rows, SIMPLIFY = FALSE)#
+    }#
+#
+    output <- t(matrix(unlist(box_data), nrow = length(data$subsets), byrow = TRUE))#
+#
+    colnames(output) <- names(data$subsets)#
+#
+    return(output)#
+}#
+#
+## The following is a modified version of plot.randtest from ade4 v1.4-3#
+plot.randtest <- function (data_sub, nclass = 10, coeff = 1, ...) {#
+    ## Observed data#
+    observed <- data_sub$obs#
+    ## Hist info#
+    histogram <- data_sub$plot$hist#
+    ## Plot info#
+    xlim <- data_sub$plot$xlim#
+    ylim <- c(0, max(data_sub$plot$hist$count))#
+#
+    ## Plotting the simulated data#
+    plot(data_sub$plot$hist, xlim = xlim, col = grey(0.8), ...)#
+#
+    ## Adding the observed data#
+    lines(c(observed, observed), c(ylim[2]/2, 0))#
+    points(observed, ylim[2]/2, pch = 18, cex = 2)#
+#
+    ## Adding the legend (test results)#
+    legend("topleft", bty = "n", legend = c("p-value", round(data_sub$pvalue, 5)), cex = 0.7, adj = 0.2)#
+}#
+#
+# Plotting model tests results#
+plot.model.test.support <- function(data, col, ylab, ylim, ...) {#
+#
+    ## Extracting the weighted aicc#
+    plot_aic <- data$aic.models[, 3]#
+#
+    ## Ordering the weighted aicc#
+    ordered_aic <- plot_aic[order(plot_aic, decreasing = TRUE)]#
+#
+    ## Plot#
+    plotcoords <- graphics::barplot(ordered_aic, col = col, ylim = ylim, ylab = ylab, ...)#
+}#
+#
+# ~~~~~~~~~~#
+# sequential.test plots#
+# ~~~~~~~~~~#
+## Adding a line#
+# add.line <- function(xs, ys, lines.args) {#
+#     if(!is.null(lines.args)) {#
+#         ## Adding the x,y coordinates#
+#         lines.args$x <- xs ; lines.args$y <- ys#
+#         do.call(lines, lines.args)#
+#     } else {#
+#         lines(xs, ys)#
+#     }#
+# }#
+#
+## Adding significance tokens#
+# significance.token <- function(xs, ys, p.value, token.args) {#
+#     if(p.value < 0.1) {#
+#         ## Selecting the token#
+#         if(p.value < 0.1) token <- "."#
+#         if(p.value < 0.05) token <- "*"#
+#         if(p.value < 0.01) token <- "**"#
+#         if(p.value < 0.001) token <- "***"#
+#         ## Default plotting#
+#         if(is.null(token.args)) {#
+#             text(x = sum(xs)/2, y = max(ys)+max(ys)*0.05, token)#
+#         } else {#
+#         ## Plotting with arguments#
+#             token.args$labels <- token#
+#             token.args$x <- sum(xs)/2#
+#             if(any(names(token.args) == "float")) {#
+#                 token.args$y <- max(ys)+max(ys)*token.args$float#
+#                 token.args$float <- NULL#
+#             } else {#
+#                 token.args$y <- max(ys)+max(ys)*0.05#
+#             }#
+#             do.call(text, token.args)#
+#         }#
+#     }#
+# }#
+#
+## Getting the two coordinates of the intercepts (intercept0 and intercept predicted)#
+# get.intercept.coords <- function(results_out, model_number, is.distribution, significance) {#
+#     if(is.distribution != TRUE) {#
+#         ## Get the first y coordinate (first intercept)#
+#         y1 <- results_out$Intercept[model_number, 1]#
+#         ## Test if intercept0 is significant#
+#         if(model_number == 1) {#
+#             if(results_out$Intercept[model_number, 4] > 0.05) {#
+#                 y1 <- 0#
+#             }#
+#         }#
+#
+#         ## Get the second y coordinate (second intercept)#
+#         if(model_number < nrow(results_out$Intercept)) {#
+#             ## Intercept already estimated#
+#             y2 <- results_out$Intercept[model_number+1, 1]#
+#         } else {#
+#             ## Estimate the intercept#
+#             if(results_out$Slopes[model_number, 4] < 0.05) {#
+#                 slope <- results_out$Slopes[model_number, 1]#
+#             } else {#
+#                 slope <- 0#
+#             }#
+#             y2 <- intercept.estimate(results_out$Intercepts[model_number,1], slope)#
+#         }#
+#     } else {#
+#         ## Get the first y coordinate#
+#         if(model_number == 1) {#
+#             ## Get the initial (estimated) intercept if significant#
+#             if(results_out$Intercept$Initial[4, significance] < 0.05) {#
+#                 y1 <- unlist(results_out$Intercept$Initial[1, significance])#
+#             } else {#
+#                 y1 <- 0#
+#             }#
+#         } else {#
+#             ## Get the predicted intercept#
+#             y1 <- unlist(results_out$Intercepts$Predicted[model_number-1, significance])#
+#         }#
+#
+#         ## Get the second y coordinate (second intercept)#
+#         if(model_number-1 < nrow(results_out$Intercept$Predicted)) {#
+#             ## Intercept already estimated#
+#             y2 <- unlist(results_out$Intercepts$Predicted[model_number, significance])#
+#         } else {#
+#             ## Estimate the intercept#
+#             if(results_out$Slopes$`Pr(>|t|)`[model_number, significance] < 0.05) {#
+#                 slope <- unlist(results_out$Slopes$Estimate[model_number, significance])#
+#             } else {#
+#                 slope <- 0#
+#             }#
+#             y2 <- intercept.estimate(unlist(results_out$Intercepts$Predicted[model_number-1, significance]), slope)#
+#         }        #
+#     }#
+#
+#     ## Return the coordinates#
+#     return(c(y1, y2))#
+# }#
+#
+## Plotting the results of sequential tests#
+# plot.seq.test <- function(results_out, is.distribution, significance, lines.args, token.args) {#
+#     ## Get the number of models to plot#
+#     if(is.distribution != TRUE) {#
+#         n_models <- nrow(results_out$Slopes)#
+#     } else {#
+#         n_models <- nrow(results_out$Slopes$Estimate)#
+#     }#
+#
+#     ## Loop through each model#
+#     for(model_number in 1:n_models) {#
+#         ## Getting x,y coordinates for one model#
+#         x_coords <- c(model_number, model_number+1)#
+#         y_coords <- get.intercept.coords(results_out, model_number=model_number, is.distribution, significance)#
+#
+#         ## Plotting the line#
+#         add.line(x_coords, y_coords, lines.args)#
+#
+#         ## Add significance (if necessary)#
+#         if(is.distribution != TRUE) {#
+#             p_value <- results_out$Slope[model_number, 4]#
+#         } else {#
+#             p_value <- results_out$Slope$`Pr(>|t|)`[model_number, significance]#
+#             ## get p_value#
+#         }#
+#
+#         significance.token(x_coords, y_coords, p_value, token.args)#
+#     }#
+# }#
+#Plot sequential.test shortcut#
+# if(length(class(data)) == 2) {#
+#     if(class(data)[[1]] == "dispRity" && class(data)[[2]] == "seq.test") {#
+#
+#         #lines.args sanitizing#
+#         if(!is.null(lines.args)) check.class(lines.args, "list")#
+#
+#         #token.args sanitizing#
+#         if(!is.null(token.args)) check.class(token.args, "list")#
+#
+#         #Creating the table results#
+#         results_out <- summary.seq.test(data, quantiles, cent.tend, recall, digits = 10, results = "coefficients", match_call = list(cent.tend = NULL))#
+#
+#         #Checking if distribution#
+#         is_distribution <- ifelse(length(data$models[[1]]) == 1, FALSE, TRUE)#
+#
+#         #significance sanitizing#
+#         if(is_distribution == TRUE) {#
+#             if(class(significance) == "character") {#
+#                 if(significance != "cent.tend") {stop("significance argument must be either 'cent.tend' or a single 'numeric' value.")}#
+#                 significance = 1#
+#             } else {#
+#                 check.class(significance, "numeric", " must be either 'cent.tend' or a single 'numeric' value.")#
+#                 check.length(significance, 1, " must be either 'cent.tend' or a single 'numeric' value.")#
+#                 if(is.na(match(significance, seq(from = 1, to = length(quantiles)*2)))) {#
+#                     stop("significance argument must be the number of the quantile (e.g. 1 for the first quantile).")#
+#                 } else {#
+#                     significance = significance + 1#
+#                 }#
+#             }#
+#         }#
+#         #Plotting the results#
+#         if(add != TRUE) {#
+#             #subsamples#
+#             subsamples <- unique(unlist(strsplit(names(data$models), split = " - ")))#
+#             #Get the all the intercepts estimate#
+#             if(is_distribution == TRUE) {#
+#                 all_intercepts <- unlist(c(results_out$Intercepts$Initial[1,significance], results_out$Intercepts$Predicted[,significance], intercept.estimate(unlist(results_out$Intercepts$Predicted[(length(subsamples)-2),significance]), unlist(results_out$Slopes$Estimate[(length(subsamples)-1),significance]))))#
+#             } else {#
+#                 all_intercepts <- c(results_out$Intercepts[,1], intercept.estimate(results_out$Intercepts[(length(subsamples)-1),1], results_out$Slopes[(length(subsamples)-1),1]))#
+#             }#
+#             if(missing(xlab)) {#
+#                 xlab <- "subsamples"#
+#             }#
+#             if(missing(ylab)) {#
+#                 ylab <- "Estimated disparity"#
+#             }#
+#
+#             #Empty plot#
+#             subsamples_length <- length(subsamples)#
+#             plot(seq(from = 1, to = subsamples_length), all_intercepts, col = "white", xlab = xlab, ylab = ylab, xaxt = "n", ...)#
+#             #plot(seq(from = 1, to = subsamples_length), all_intercepts, col = "white", xlab = xlab, ylab = ylab, xaxt = "n") ; warning("DEBUG in plot.dispRity")#
+#             axis(1, at = 1:subsamples_length, labels = subsamples)#
+#         }#
+#
+#         plot.seq.test(results_out, is_distribution, significance, lines.args, token.args)#
+#
+#     }
+plot(disparity, rarefaction = 5, type = "b")
+plot(disparity, rarefaction = 10, type = "b", add = TRUE)
+c(point-width/(quantiles_n - cis + 1.5), point+width/(quantiles_n - cis + 1.5), point+width/(quantiles_n - cis + 1.5), point-width/(quantiles_n - cis + 1.5)) + shift
+c(point-width/(quantiles_n - cis + 1.5), point+width/(quantiles_n - cis + 1.5), point+width/(quantiles_n - cis + 1.5), point-width/(quantiles_n - cis + 1.5))
+shift

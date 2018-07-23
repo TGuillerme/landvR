@@ -1,0 +1,35 @@
+Package: landvR
+Title: Tools for measuring landmark position variation
+Author: Thomas Guillerme [aut, cre, cph],
+Maintainer: Thomas Guillerme <guillert@tcd.ie>
+Version: 1.2.0
+Date: 2018-07-10
+Description: A package for measuring the variation of 2D and 3D landmarks variation in the Procrustes space based on the geomorph package data format.
+Depends:
+    R (>= 3.0.0),
+    geomorph
+Imports:
+	ade4,
+	geiger,
+	geometry,
+	geoscale,
+	graphics,
+	grDevices,
+	hdrcde,
+	methods,
+	mnormt,
+	paleotree,
+	phangorn,
+	phyclust,
+	rgl,
+	utils,
+	vegan,
+	spptest,
+	zoo
+License: GPL-3 | file LICENSE
+VignetteBuilder: knitr
+Suggests:
+    testthat,
+    knitr
+RoxygenNote: 6.0.1
+URL: https://github.com/TGuillerme/landvR
