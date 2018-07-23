@@ -1,0 +1,84 @@
+30*12
+96*2
+16*12
+setwd("/Users/TGuillerme/Projects/landmark-test/Analysis")
+## Loading the libraries (and installing if necessary)#
+if(!require(devtools)) install.packages("devtools")#
+if(!require(knitr)) install.packages("knitr")#
+if(!require(geomorph)) install.packages("geomorph")#
+if(!require(dispRity)) install.packages("dispRity")#
+if(!require(landmarktest)) install_github("TGuillerme/landmark-test")#
+library(dispRity)#
+library(landmarktest)#
+source("../Functions/utilities.R")#
+set.seed(42)
+## Loading a dataset#
+load("../Data/Processed/wombat_ursinus.Rda")#
+#
+## Selecting a partition#
+data <- land_data$cranium#
+#
+## Procrustes data#
+procrustes <- data$procrustes#
+#
+## Landmark classification#
+landmarks_groups <- data$landmarkgroups
+## Loading the dataset#
+data(plethodon)#
+#
+## Generating a Procrustes superimposition#
+procrustes <- gpagen(plethodon$land, print.progress = FALSE)#
+#
+## Landmark classification#
+back <- c(1,2,10,11,12)#
+front <- c(1:12)[-back]#
+landmarks_groups <- data.frame("landmark" = c(back, front),#
+                               "group" = c(rep("back", 5), rep("front", 7)))
+## Partitions#
+partitions <- list()#
+for(part in unique(landmarks_groups[,2])) {#
+    partitions[[part]] <- which(landmarks_groups[,2] == part)#
+}
+## Procrustes variation ranges#
+variation <- variation.range(procrustes, type = "spherical", what = "radius", return.ID = TRUE)#
+#
+## The range of variation#
+variation$range#
+#
+## The two most extreme specimens' IDs#
+variation$min.max
+## Procrustes variation ranges (95% CI)#
+variation_95 <- variation.range(procrustes, type = "spherical", what = "radius", return.ID = TRUE,#
+                                     CI = 0.95)
+## Function for applying the rand tests#
+lapply.rand.test <- function(partition, data, test, ...) {#
+    rand.test(data[, "radius"], partition, test = test, test.parameter = TRUE, ...)#
+}#
+#
+## Size differences#
+differences <- lapply(partitions, lapply.rand.test, data = variation$range, test = area.diff)#
+differences_95 <- lapply(partitions, lapply.rand.test, data = variation_95$range, test = area.diff)#
+#
+## Probabilities of overlap#
+overlaps <- lapply(partitions, lapply.rand.test, data = variation$range, test = bhatt.coeff)#
+overlaps_95 <- lapply(partitions, lapply.rand.test, data = variation_95$range, test = bhatt.coeff)
+## Running one test for one partition#
+one_test <- rand.test(variation[, "radius"], partition[[1]],#
+                      test = area.diff, test.parameter = TRUE)
+## Size differences#
+library(knitr)#
+kable(make.table(differences, "bonferroni"), digits = 5, caption = "Size difference (100% CI)")#
+kable(make.table(differences_95, "bonferroni"), digits = 5, caption = "Size difference (95% CI)")
+install.package("available")
+install.packages("available")
+library(available)
+available("landvR")
+available("dispRity")
+available("pastis")
+available("srd")
+available("std")
+? available
+refresh.pkg("landvR")
+?roxygen
+??roxygen
+document()

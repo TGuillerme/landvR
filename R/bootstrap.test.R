@@ -18,7 +18,7 @@
 #' If \code{test.parameter} is set to \code{TRUE}, the code tests whether the resulting test parameters between the observed subset and the random ones are significantly different (base on the same procedure as in \code{link[ade4]{rantest}}).
 #' 
 #' @return
-#' This function returns a \code{"randtest"} object that can be passed to the generic S3 functions \code{\link[randtest]{print.randtest}} or \code{\link[randtest]{plot.randtest}}.
+#' This function returns a \code{"randtest"} object that can be passed to the generic S3 functions \code{\link[ade4]{print.randtest}} or \code{\link[ade4]{plot.randtest}}.
 #' The output also contains to extra elements \code{output$observed} and \code{output$random} containing the raw results of respectively the observed and random tests.
 #' 
 #' @examples

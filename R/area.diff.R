@@ -48,6 +48,7 @@
 #' @export
 #' @importFrom zoo rollmean
 #' @importFrom stats bw.nrd0
+#' @importFrom dispRity make.metric
 
 area.diff <- function(x, y, rarefy, cent.tend = mean, sort = TRUE) {
 
@@ -60,7 +61,7 @@ area.diff <- function(x, y, rarefy, cent.tend = mean, sort = TRUE) {
         silent <- check.class(rarefy, c("integer", "numeric"))
     }
     check.class(cent.tend, "function")
-    test_fun <- make.metric(cent.tend, silent = TRUE)
+    test_fun <- dispRity::make.metric(cent.tend, silent = TRUE)
     if(test_fun != "level1") {
         stop(paste0("Central tendency function ", as.expression(match_call$cent.tend), " must output a single value."))
     }

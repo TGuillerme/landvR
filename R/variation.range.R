@@ -10,12 +10,11 @@
 #' @param axis Optional, if an ordinated matrix is used, which axis (axes) to use. If left empty, all the axes will be used.
 #' @param return.ID \code{logical}, whether to return the ID of the max/min specimens or not.
 #' @param CI Optional, a value of confidence interval to use (rather than the max/min).
-#' @param CI.pre Logical, whether apply the CI before (\code{TRUE}) or during (\code{FALSE} - default) the variation range calculation; see details.
 #' 
 #' 
 #' @details
-# When \code{type = "spherical"}, the distances are relative to each landmark, the selection of the two most extreme specimen is based on their absolute value (i.e. to select the two most distant specimen). Potential CI limits only affect the right side of the curve (the maxima).
-# When \code{type = "vector"}, the distances are absolute from the centre of the specimen (and can be negative), the selection of the two most extreme specimen is thus based on the absolute values as well (to select the most distance specimen). However, potential CI limits affect both size of the curve (removing the maxima and minima).
+#' When \code{type = "spherical"}, the distances are relative to each landmark, the selection of the two most extreme specimen is based on their absolute value (i.e. to select the two most distant specimen). Potential CI limits only affect the right side of the curve (the maxima).
+#' When \code{type = "vector"}, the distances are absolute from the centre of the specimen (and can be negative), the selection of the two most extreme specimen is thus based on the absolute values as well (to select the most distance specimen). However, potential CI limits affect both size of the curve (removing the maxima and minima).
 #'
 #' @examples
 #' ## Loading the geomorph dataset
@@ -54,9 +53,6 @@
 #' @author Thomas Guillerme
 #' @export
 #' @importFrom stats prcomp quantile
-#' @importFrom hdrcde hdr
-
-
 
 variation.range <- function(procrustes, type = "spherical", angle = "degree", what = "radius", ordination, axis, return.ID = FALSE, CI) {
 
@@ -82,7 +78,7 @@ variation.range <- function(procrustes, type = "spherical", angle = "degree", wh
         }
 
         ## Convert the CI value into quantile boundaries
-        cis <- CI.converter(CI)
+        cis <- sort(c(50-CI/2, 50+CI/2)/100)
         quantile_max <- cis[2]
         quantile_min <- cis[1]
     }

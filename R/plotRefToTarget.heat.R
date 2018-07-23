@@ -362,7 +362,7 @@ plotRefToTarget.heat <- function(M1, M2, method = "vector", plotRefToTarget.args
 
             ## Function for adding the segments
             add.segment <- function(i, M1, M2, lwd = 2, col) {
-              segments3d(rbind(M1[i, ], M2[i, ]), lwd = lwd, col = col[i])
+              rgl::segments3d(rbind(M1[i, ], M2[i, ]), lwd = lwd, col = col[i])
             }
 
             silent <- sapply(1:nrow(M1), add.segment, M1 = M1, M2 = M2, col = col_vector)
@@ -403,7 +403,7 @@ plotRefToTarget.heat <- function(M1, M2, method = "vector", plotRefToTarget.args
                 tarlinklty <- rep(gP$tar.link.lty, nrow(dots$links))[1:nrow(dots$links)]
                 
                 for (i in 1:nrow(dots$links)) {
-                    segments3d(rbind(M1[dots$links[i, 1], ], M1[dots$links[i, 2], ]), col = linkcol[i], lty = linklty[i], lwd = linklwd[i])
+                    rgl::segments3d(rbind(M1[dots$links[i, 1], ], M1[dots$links[i, 2], ]), col = linkcol[i], lty = linklty[i], lwd = linklwd[i])
                     rgl::segments3d(rbind(M2[dots$links[i, 1], ], M2[dots$links[i, 2], ]), col = tarlinkcol[i], lty = tarlinklty[i], lwd = tarlinklwd[i])
                 }
             }

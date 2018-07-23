@@ -20,7 +20,7 @@
 #' If \code{test.parameter} is set to \code{TRUE}, the code tests whether the resulting test parameters between the observed subset and the random ones are significantly different (base on the same procedure as in \code{link[ade4]{rantest}}).
 #' 
 #' @return
-#' This function returns a \code{"randtest"} object that can be passed to the generic S3 functions \code{\link[randtest]{print.randtest}} or \code{\link[randtest]{plot.randtest}}.
+#' This function returns a \code{"randtest"} object that can be passed to the generic S3 functions \code{\link[ade4]{print.randtest}} or \code{\link[ade4]{plot.randtest}}.
 #' The output also contains to extra elements \code{output$observed} and \code{output$random} containing the raw results of respectively the observed and random tests.
 #' 
 #' @examples
@@ -61,7 +61,7 @@
 #' 
 #' @author Thomas Guillerme
 #' @export
-#' @importFrom stats sd var
+#' @importFrom stats sd var rnorm
 #' @importFrom graphics hist
 
 rand.test <- function(distribution, subset, test, replicates = 100, resample = TRUE, rarefaction, test.parameter = FALSE, parameter, alternative = "two-sided", ...) {
@@ -107,7 +107,7 @@ rand.test <- function(distribution, subset, test, replicates = 100, resample = T
     ## Testing the parameter (if any)
     test_parameter <- FALSE
     ## Testing the test output
-    testing <- test(rnorm(10), rnorm(10))
+    testing <- test(stats::rnorm(10), stats::rnorm(10))
     if(missing(parameter)) {
         ## Checking if the output is valid without a parameter value
         if(class(testing) == "numeric" && length(testing) == 1) {
