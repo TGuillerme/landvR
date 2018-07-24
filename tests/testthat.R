@@ -1,4 +1,4 @@
 library(testthat)
-library(dispRity)
+library(landvR)
 
-test_check("dispRity", reporter = "list")
+test_check("landvR", reporter = "list")
