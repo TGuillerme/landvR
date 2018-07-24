@@ -9,7 +9,7 @@ select.procrustes(procrustes, selector = mean, factors, specimen = FALSE)
 \arguments{
 \item{procrustes}{Procrustes data of class \code{"gpagen"} or an \code{array} of coordinates.}
 
-\item{selector}{A \code{function} of which values to select (default = \code{\link[]{mean}}).}
+\item{selector}{A \code{function} of which values to select (default = \code{\link{mean}}).}
 
 \item{factors}{A \code{list} of elements names or IDs to split the data.}
 

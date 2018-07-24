@@ -3,7 +3,7 @@
 #' @description Selects specific values of specimens from a Procrustes superimposition
 #'
 #' @param procrustes Procrustes data of class \code{"gpagen"} or an \code{array} of coordinates.
-#' @param selector A \code{function} of which values to select (default = \code{\link[]{mean}}).
+#' @param selector A \code{function} of which values to select (default = \code{\link{mean}}).
 #' @param factors A \code{list} of elements names or IDs to split the data.
 #' @param specimen Whether to return the values of the estimated selector (\code{FALSE} - default - a non-existing specimen) or the specimen the closest to the the estimated selector (\code{TRUE}).
 #' 
