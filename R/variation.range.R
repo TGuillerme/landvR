@@ -3,7 +3,7 @@
 #' @description Selecting the range of differences between the specimen with the maximum and minimum variation
 #'
 #' @param procrustes Procrustes data of class \code{"gpagen"}.
-#' @param type Which type of coordinates to calculate (see \code{\link{coordinates.difference}} - default is \code{"sperical"}). See details.
+#' @param type Which type of coordinates to calculate (see \code{\link{coordinates.difference}} - default is \code{"spherical"}). See details.
 #' @param angle Which type of angle to calculate (see \code{\link{coordinates.difference}} - default is \code{"degree"}).
 #' @param what Which element from the \code{\link{coordinates.difference}} to use (default is \code{"radius"}).
 #' @param ordination Optional, either \code{TRUE} to perform an ordination or directly an ordinated PCA matrix (\code{"prcomp"}) to calculate the range from there.
@@ -24,7 +24,6 @@
 #' ## Performing the Procrustes superimposition
 #' proc_super <- gpagen(plethodon$land, print.progress = FALSE)
 #' 
-#' 
 #' ## Getting the two most different specimen based on their landmark change radii
 #' spec_range <- variation.range(proc_super, return.ID = TRUE)
 #' 
@@ -34,10 +33,8 @@
 #' ## The range of variation per landmark
 #' spec_range$range
 #' 
-#' 
 #' ## Getting the two most different specimen based on the first axis of the ordination
 #' variation.range(proc_super, ordination = TRUE, axis = 1, type = "vector", what = "length")
-#' 
 #' 
 #' ## Getting the range variation between specimen using a 95 confidence interval range
 #' spec_range95 <- variation.range(proc_super, CI = 0.95, return.ID = TRUE)
@@ -53,11 +50,14 @@
 #' @author Thomas Guillerme
 #' @export
 #' @importFrom stats prcomp quantile
+#' @importFrom geomorph two.d.array
 
 variation.range <- function(procrustes, type = "spherical", angle = "degree", what = "radius", ordination, axis, return.ID = FALSE, CI) {
 
+    match_call <- match.call()
+
     ## procrustes
-    check.class(procrustes, "gpagen")
+    proc_class <- check.class(procrustes, "gpagen")
 
     ## CI
     if(missing(CI)) {
@@ -65,16 +65,17 @@ variation.range <- function(procrustes, type = "spherical", angle = "degree", wh
     } else {
 
         do_CI <- TRUE
+
         check.length(CI, 1, msg = " must be on confidence interval in probability or percentage.")
-        if(CI > 1) {
-            CI <- CI * 100
-            if(CI > 100) {
-                stop("CI must be a percentage between 0 and 100.")
-            }
-        } else {
-            if(CI < 0) {
-                stop("CI must be a percentage between 0 and 100.")
-            }
+
+        if(CI > 100) {
+            stop("CI must be a percentage or a probability.")
+        }
+        if(CI < 0) {
+            stop("CI must be a percentage or a probability.")
+        }
+        if(CI <= 1) {
+            CI <- CI * 100  
         }
 
         ## Convert the CI value into quantile boundaries
@@ -91,9 +92,9 @@ variation.range <- function(procrustes, type = "spherical", angle = "degree", wh
                 do_ordinate <- TRUE
 
                 ## Convert the array in 2D
-                array_2d <- two.d.array(procrustes$coords)
+                array_2d <- geomorph::two.d.array(procrustes$coords)
 
-                ## measure the tolerance
+                ## measure the tolerance (to be equivalent to geomorph procedures)
                 tol <- stats::prcomp(array_2d)$sdev^2
                 tolerance <- cumsum(tol)/sum(tol)
                 tolerance <- length(which(tolerance < 1)) 
@@ -126,8 +127,14 @@ variation.range <- function(procrustes, type = "spherical", angle = "degree", wh
             axis <- 1:ncol(ordination$x)
         } else {
             check.class(axis, "numeric")
-            if(min(axis) < 1 || max(axis) > ncol(ordination$x)) {
-                stop(paste0("Wrong axis number. Should be between 1 and ", ncol(ordination$x), "."))
+
+            axis_test <- axis %in% 1:ncol(ordination$x)
+            if(any(!axis_test)) {
+                if(length(which(axis_test == FALSE)) == 1) {
+                    stop(paste0("Axis number ", axis[!axis_test], " not found."))
+                } else {
+                    stop(paste0("Axes number ", paste(axis[!axis_test], collapse = ", "), " not found."))
+                }
             }
         }
     }
@@ -205,8 +212,8 @@ variation.range <- function(procrustes, type = "spherical", angle = "degree", wh
         ## Get the selector function
         if(do_CI) {
             warning("The CI implementation for ordinated data might not give the exact results.")
-            fun_max <- function(x, CI) return(max(x[which(x <= quantile(x, probs = CI))]))
-            fun_min <- function(x, CI) return(min(x[which(x >= quantile(x, probs = 1-CI))]))
+            fun_max <- function(x, CI) return(max(x[which(x <= quantile(x, probs = CI/100))]))
+            fun_min <- function(x, CI) return(min(x[which(x >= quantile(x, probs = 1-CI/100))]))
         } else {
             CI <- NULL
             fun_max <- function(x, CI) return(max(x))

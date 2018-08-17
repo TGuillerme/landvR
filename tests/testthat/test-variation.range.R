@@ -10,12 +10,77 @@ test_that("variation.range sanitizing works", {
     data(plethodon)
     data(scallops)
     ## Performing the Procrustes superimposition
-    proc_super_2D <- geomorph::gpagen(plethodon$land, print.progress = FALSE)$coords
-    proc_super_3D <- geomorph::gpagen(scallops$coorddata, print.progress = FALSE)$coords
-    diff_2D <- coordinates.difference(proc_super_2D)
-    diff_2D_coord <- coordinates.difference(proc_super_2D, type = "spherical")
-    expect_warning(diff_3D <- coordinates.difference(proc_super_3D, type = "vector"))
+    proc_super_2D <- geomorph::gpagen(plethodon$land, print.progress = FALSE)
+    proc_super_3D <- geomorph::gpagen(scallops$coorddata, print.progress = FALSE)
+
+    ## Errors
+    expect_error(variation.range("proc_super_2D"))
+    expect_error(variation.range(proc_super_2D, type = "bob"))
+    expect_error(variation.range(proc_super_2D, angle = "bob"))
+    expect_error(variation.range(proc_super_2D, what = "bob"))
+    expect_error(variation.range(proc_super_2D, return.ID = "FALSE"))
+    expect_error(variation.range(proc_super_2D, CI = 1209))
+    expect_error(variation.range(proc_super_2D, ordination = "woops"))
+    expect_error(variation.range(proc_super_2D, ordination = TRUE, axis = TRUE))
+    expect_error(variation.range(proc_super_2D, ordination = TRUE, axis = 0))
+    expect_error(variation.range(proc_super_2D, ordination = TRUE, axis = c(0,1,88)))
 
 
+    ## No ordination
+    test095 <- variation.range(proc_super_2D, CI = 0.95)
+    test100 <- variation.range(proc_super_2D)
+    test095ID <- variation.range(proc_super_3D, CI = 0.95, return.ID = TRUE)
+    test100ID <- variation.range(proc_super_3D, return.ID = TRUE)
+    expect_is(test095, "matrix")
+    expect_is(test100, "matrix")
+    expect_equal(dim(test095), c(12, 2))
+    expect_equal(dim(test100), c(12, 2))
+    expect_is(test095ID, "list")
+    expect_is(test100ID, "list")
+    expect_equal(names(test095ID), c("range", "min.max"))
+    expect_equal(names(test100ID), c("range", "min.max"))
+    expect_equal(dim(test095ID[[1]]), c(46, 3))
+    expect_equal(dim(test100ID[[1]]), c(46, 3))
+
+    ## Ordination (auto)
+    test095 <- variation.range(proc_super_2D, ordination = TRUE, CI = 0.95)
+    test100 <- variation.range(proc_super_2D, ordination = TRUE)
+    test095ID <- variation.range(proc_super_2D, ordination = TRUE, CI = 0.95, axis = 1, return.ID = TRUE)
+
+
+
+    ####
+    # BUGGED
+    ###
+    test100ID <- variation.range(proc_super_2D, ordination = TRUE, axis = c(1,2), return.ID = TRUE)
+
+    ####
+    # DOUBLE CHECK THE WARNINGS!
+    ###
+
+    expect_is(test095, "matrix")
+    expect_is(test100, "matrix")
+    expect_equal(dim(test095), c(12, 2))
+    expect_equal(dim(test100), c(12, 2))
+    expect_is(test095ID, "list")
+    expect_is(test100ID, "list")
+    expect_equal(names(test095ID), c("range", "min.max"))
+    expect_equal(names(test100ID), c("range", "min.max"))
+    expect_equal(dim(test095ID[[1]]), c(12, 2))
+    expect_equal(dim(test100ID[[1]]), c(12, 2))
+
+
+    ## Ordination (input)
+    array_2d <- geomorph::two.d.array(proc_super_2D$coords)
+    tol <- stats::prcomp(array_2d)$sdev^2
+    tolerance <- cumsum(tol)/sum(tol)
+    tolerance <- length(which(tolerance < 1)) 
+    if(length(tolerance) < length(tol)){
+        tolerance <- tolerance + 1
+    }
+    tolerance <- max(c(tol[tolerance]/tol[1],0.005))
+    ordination <- stats::prcomp(array_2d, center = TRUE, scale. = FALSE, retx = TRUE, tol = tolerance)
+    test100_input <- variation.range(proc_super_2D, ordination = ordination)
+    expect_true(all(test100 == test100_input))
 
 })

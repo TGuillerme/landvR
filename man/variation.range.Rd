@@ -10,7 +10,7 @@ variation.range(procrustes, type = "spherical", angle = "degree",
 \arguments{
 \item{procrustes}{Procrustes data of class \code{"gpagen"}.}
 
-\item{type}{Which type of coordinates to calculate (see \code{\link{coordinates.difference}} - default is \code{"sperical"}). See details.}
+\item{type}{Which type of coordinates to calculate (see \code{\link{coordinates.difference}} - default is \code{"spherical"}). See details.}
 
 \item{angle}{Which type of angle to calculate (see \code{\link{coordinates.difference}} - default is \code{"degree"}).}
 
@@ -39,7 +39,6 @@ data(plethodon)
 ## Performing the Procrustes superimposition
 proc_super <- gpagen(plethodon$land, print.progress = FALSE)
 
-
 ## Getting the two most different specimen based on their landmark change radii
 spec_range <- variation.range(proc_super, return.ID = TRUE)
 
@@ -49,10 +48,8 @@ spec_range$min.max
 ## The range of variation per landmark
 spec_range$range
 
-
 ## Getting the two most different specimen based on the first axis of the ordination
 variation.range(proc_super, ordination = TRUE, axis = 1, type = "vector", what = "length")
-
 
 ## Getting the range variation between specimen using a 95 confidence interval range
 spec_range95 <- variation.range(proc_super, CI = 0.95, return.ID = TRUE)
