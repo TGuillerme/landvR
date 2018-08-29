@@ -43,21 +43,11 @@ test_that("variation.range sanitizing works", {
     expect_equal(dim(test100ID[[1]]), c(46, 3))
 
     ## Ordination (auto)
-    test095 <- variation.range(proc_super_2D, ordination = TRUE, CI = 0.95)
+    expect_warning(test095 <- variation.range(proc_super_2D, ordination = TRUE, CI = 0.95))
     test100 <- variation.range(proc_super_2D, ordination = TRUE)
-    test095ID <- variation.range(proc_super_2D, ordination = TRUE, CI = 0.95, axis = 1, return.ID = TRUE)
-
-
-
-    ####
-    # BUGGED
-    ###
+    expect_warning(test095ID <- variation.range(proc_super_2D, ordination = TRUE, CI = 0.95, axis = 1, return.ID = TRUE))
     test100ID <- variation.range(proc_super_2D, ordination = TRUE, axis = c(1,2), return.ID = TRUE)
-
-    ####
-    # DOUBLE CHECK THE WARNINGS!
-    ###
-
+    
     expect_is(test095, "matrix")
     expect_is(test100, "matrix")
     expect_equal(dim(test095), c(12, 2))
@@ -68,7 +58,6 @@ test_that("variation.range sanitizing works", {
     expect_equal(names(test100ID), c("range", "min.max"))
     expect_equal(dim(test095ID[[1]]), c(12, 2))
     expect_equal(dim(test100ID[[1]]), c(12, 2))
-
 
     ## Ordination (input)
     array_2d <- geomorph::two.d.array(proc_super_2D$coords)

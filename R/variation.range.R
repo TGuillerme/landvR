@@ -53,7 +53,6 @@
 #' @importFrom geomorph two.d.array
 
 variation.range <- function(procrustes, type = "spherical", angle = "degree", what = "radius", ordination, axis, return.ID = FALSE, CI) {
-
     match_call <- match.call()
 
     ## procrustes
@@ -69,10 +68,10 @@ variation.range <- function(procrustes, type = "spherical", angle = "degree", wh
         check.length(CI, 1, msg = " must be on confidence interval in probability or percentage.")
 
         if(CI > 100) {
-            stop("CI must be a percentage or a probability.")
+            stop("CI must be a percentage or a probability.", call. = FALSE)
         }
         if(CI < 0) {
-            stop("CI must be a percentage or a probability.")
+            stop("CI must be a percentage or a probability.", call. = FALSE)
         }
         if(CI <= 1) {
             CI <- CI * 100  
@@ -126,14 +125,14 @@ variation.range <- function(procrustes, type = "spherical", angle = "degree", wh
         if(missing(axis)) {
             axis <- 1:ncol(ordination$x)
         } else {
-            check.class(axis, "numeric")
+            silent <- check.class(axis, c("numeric", "integer"))
 
             axis_test <- axis %in% 1:ncol(ordination$x)
             if(any(!axis_test)) {
                 if(length(which(axis_test == FALSE)) == 1) {
-                    stop(paste0("Axis number ", axis[!axis_test], " not found."))
+                    stop(paste0("Axis number ", axis[!axis_test], " not found."), call. = FALSE)
                 } else {
-                    stop(paste0("Axes number ", paste(axis[!axis_test], collapse = ", "), " not found."))
+                    stop(paste0("Axes number ", paste(axis[!axis_test], collapse = ", "), " not found."), call. = FALSE)
                 }
             }
         }
@@ -202,16 +201,20 @@ variation.range <- function(procrustes, type = "spherical", angle = "degree", wh
 
         ## Internal function from geomorph:plotTangentSpace
         get.pc.min.max <- function(axis, what, PCA, GPA, CI) {
-            if(length(axis) == 1) {
-               output <- arrayspecs(as.vector(t(GPA$consensus)) + c(what(PCA$x[,axis], CI = CI), rep(0, ncol(PCA$x)-length(axis))) %*% t(PCA$rotation), dim(GPA$consensus)[1], dim(GPA$consensus)[2])
+            ## Transforming the matrix (generalised from geomorph::plotRefToTarget)
+            if(length(axis) == 1){
+                transform_matrix <- as.vector(t(GPA$consensus)) + c(what(PCA$x[,axis], CI = CI), rep(0, ncol(PCA$x)-length(axis))) %*% t(PCA$rotation)
             } else {
-               output <- arrayspecs(as.vector(t(GPA$consensus)) + c(apply(PCA$x, 2, what, CI = CI), rep(0, ncol(PCA$x)-length(axis))) %*% t(PCA$rotation), dim(GPA$consensus)[1], dim(GPA$consensus)[2])
+                transform_matrix <- as.vector(t(GPA$consensus)) + c(apply(PCA$x[, axis], 2, what, CI = CI), rep(0, ncol(PCA$x[, axis])-length(axis))) %*% t(PCA$rotation[, axis])
             }
+            ## Converting into a array
+            output <- geomorph::arrayspecs(A = transform_matrix, p = dim(GPA$consensus)[1], k = dim(GPA$consensus)[2])
+            return(output)
         }
 
         ## Get the selector function
         if(do_CI) {
-            warning("The CI implementation for ordinated data might not give the exact results.")
+            warning("The CI implementation for ordinated data might not give the exact results.", call. = FALSE)
             fun_max <- function(x, CI) return(max(x[which(x <= quantile(x, probs = CI/100))]))
             fun_min <- function(x, CI) return(min(x[which(x >= quantile(x, probs = 1-CI/100))]))
         } else {
@@ -231,7 +234,7 @@ variation.range <- function(procrustes, type = "spherical", angle = "degree", wh
         variation_range <- coordinates.difference(min_coordinates, max_coordinates, type = type, angle = angle)[[1]]
 
         ## Finding the max/min specimen
-        warning("max/min coordinate configurations reflect PC minima/maxima of the PC axis specified for variation.range.")
+        # warning("max/min coordinate configurations reflect PC minima/maxima of the PC axis specified for variation.range.", call. = FALSE)
         if(length(axis) != 1) {
             axis <- axis[1]
         }
