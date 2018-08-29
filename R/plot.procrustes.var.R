@@ -1,6 +1,6 @@
-#' @title Plot shape differences as PlotRefToTarget with heat
+#' @title Plot Procrustes variation
 #'
-#' @description Modification of PlotRefToTarget to allow to add heat maps (only works for \code{methods = c("points", "vector")})
+#' @description Modification of the \code{\link[geomorph]{plotRefToTarget}} function to allow to display landmark variation on Procrustes
 #'
 #' @param M1 Matrix of landmark coordinates for the first (reference) specimen
 #' @param M2 Matrix of landmark coordinates for the second (target) specimen
@@ -37,10 +37,10 @@
 #' var_val <- variation$range[, 1]
 #'  
 #' ## Plot the variation
-#' plotRefToTarget.heat(M1, M2, method = "vector")
+#' plot.procrustes.var(M1, M2, method = "vector")
 #' 
 #' ## A weird looking plethodon
-#' plotRefToTarget.heat(M1, M2, method = "points", col = list(rainbow, "pink"), col.val = var_val,
+#' plot.procrustes.var(M1, M2, method = "points", col = list(rainbow, "pink"), col.val = var_val,
 #'                 pt.size = 2.5, plotRefToTarget.args = list(mag = 3, outline = plethodon$outline))
 #' 
 #' \dontrun{
@@ -60,7 +60,7 @@
 #' var_val <- variation$range[, 1]
 #'  
 #' ## Plot the variation in 3D
-#' plotRefToTarget.heat(M1, M2, method = "vector",  col.val = var_val,
+#' plot.procrustes.var(M1, M2, method = "vector",  col.val = var_val,
 #'                      col = list(grDevices::heat.colors, "grey"))
 #' }
 #' 
@@ -72,7 +72,7 @@
 #' @importFrom graphics plot segments points text arrows
 #' @importFrom rgl plot3d text3d
 
-plotRefToTarget.heat <- function(M1, M2, method = "vector", plotRefToTarget.args = list(...), ..., col = list("grey", "black"), col.val, pt.size) {
+plot.procrustes.var <- function(M1, M2, method = "vector", plotRefToTarget.args = list(...), ..., col = list("grey", "black"), col.val, pt.size) {
 
 
 
