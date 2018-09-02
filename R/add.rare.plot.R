@@ -17,7 +17,12 @@
 #' var_range <- variation.range(proc_super)
 #' 
 #' \dontrun{
-#' ## Rarefying the area difference to 4 elements without testing the parameter
+#' 
+#' set.seed(1)
+#' ## Selecting 6 random landmarks
+#' random_part <- sample(1:nrow(var_range), 6)
+#' 
+#' ## Rarefying the area difference to 5 elements without testing the parameter
 #' rarefy_test <- rand.test(var_range[, "radius"], random_part, rarefaction = 5,
 #'                          test = area.diff)
 #' 
