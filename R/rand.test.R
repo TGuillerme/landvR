@@ -9,7 +9,7 @@
 #' @param resample \code{logical} wether to resample the full distribution (\code{TRUE}) or the distribution without the subset (\code{FALSE}).
 #' @param rarefaction Optional, a \code{numeric} value for rarefying the subset.
 #' @param test.parameter Optional, whether to test the calculated parameter (\code{TRUE}) or not (\code{FALSE} - default).
-#' @param parameter Optional,  if the parameter is tested, which parameter to select (can be left empty if \code{test} outputs a single value or a named object containing a \code{statistic} element).
+#' @param parameter Optional, if the parameter is tested, which parameter to select (can be left empty if \code{test} outputs a single value or a named object containing a \code{statistic} element).
 #' @param alternative Optional, if the parameter is tested, what is the alternative hypothesis. Can be \code{"two-sided"} (default), \code{"greater"} or \code{"lesser"}.
 #' @param ... Any optional arguments to be passed to \code{test}.
 #' 
@@ -54,10 +54,10 @@
 #' 
 #' ## Rarefying the area difference to 4 elements without testing the parameter
 #' rarefy_test <- rand.test(var_range[, "radius"], random_part, rarefaction = 5,
-#'                          test = t.test)
+#'                          test = stats::t.test)
 #' plot(rarefy_test)
 #'
-#' @seealso \code{link[ade4]{randtest}}, \code{\link{bootstrap.test}}
+#' @seealso \code{link[ade4]{randtest}}
 #' 
 #' @author Thomas Guillerme
 #' @export

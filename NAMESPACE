@@ -2,7 +2,6 @@
 
 export(add.rare.plot)
 export(area.diff)
-export(bootstrap.test)
 export(coordinates.area)
 export(coordinates.difference)
 export(procrustes.var.plot)

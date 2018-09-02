@@ -23,7 +23,7 @@ rand.test(distribution, subset, test, replicates = 100, resample = TRUE,
 
 \item{test.parameter}{Optional, whether to test the calculated parameter (\code{TRUE}) or not (\code{FALSE} - default).}
 
-\item{parameter}{Optional,  if the parameter is tested, which parameter to select (can be left empty if \code{test} outputs a single value or a named object containing a \code{statistic} element).}
+\item{parameter}{Optional, if the parameter is tested, which parameter to select (can be left empty if \code{test} outputs a single value or a named object containing a \code{statistic} element).}
 
 \item{alternative}{Optional, if the parameter is tested, what is the alternative hypothesis. Can be \code{"two-sided"} (default), \code{"greater"} or \code{"lesser"}.}
 
@@ -74,12 +74,12 @@ plot(random_test)
 
 ## Rarefying the area difference to 4 elements without testing the parameter
 rarefy_test <- rand.test(var_range[, "radius"], random_part, rarefaction = 5,
-                         test = t.test)
+                         test = stats::t.test)
 plot(rarefy_test)
 
 }
 \seealso{
-\code{link[ade4]{randtest}}, \code{\link{bootstrap.test}}
+\code{link[ade4]{randtest}}
 }
 \author{
 Thomas Guillerme
