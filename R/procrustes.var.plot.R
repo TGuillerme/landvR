@@ -39,11 +39,11 @@
 #' var_val <- variation$range[, 1]
 #'  
 #' ## Plot the variation
-#' plot.procrustes.var(M1, M2, method = "vector")
+#' procrustes.var.plot(M1, M2)
 #' 
-#' ## A weird looking plethodon
-#' plot.procrustes.var(M1, M2, method = "points", col = list(rainbow, "pink"), col.val = var_val,
-#'                 pt.size = 2.5, plotRefToTarget.args = list(mag = 3, outline = plethodon$outline))
+#' ## A colourful plot
+#' procrustes.var.plot(M1, M2, col = list(grDevices::rainbow, "pink"), col.val = var_val,
+#'                     pt.size = 2.5)
 #' 
 #' \dontrun{
 #' ## Loading the scallops 3D data from geomorph
@@ -62,8 +62,7 @@
 #' var_val <- variation$range[, 1]
 #'  
 #' ## Plot the variation in 3D
-#' plot.procrustes.var(M1, M2, method = "vector",  col.val = var_val,
-#'                      col = list(grDevices::heat.colors, "grey"))
+#' procrustes.var.plot(M1, M2, col.val = var_val, col = list(grDevices::heat.colors, "grey"))
 #' }
 #' 
 #' @seealso \code{\link{variation.range}}
@@ -74,8 +73,9 @@
 #' @importFrom graphics plot segments points text arrows
 #' @importFrom rgl plot3d text3d
 #' @importFrom geomorph gridPar
+#' @importFrom stats na.omit
 
-plot.procrustes.var <- function(M1, M2, col = list("grey", "black"), col.val, magnitude = 1, labels = FALSE, axes = FALSE, pt.size = 1, gridPar, ...) {
+procrustes.var.plot <- function(M1, M2, col = list("grey", "black"), col.val, magnitude = 1, labels = FALSE, axes = FALSE, pt.size = 1, gridPar, ...) {
 
   ## Check the inputs
   check.class(M1, "matrix")
@@ -175,8 +175,8 @@ plot.procrustes.var <- function(M1, M2, col = list("grey", "black"), col.val, ma
     M2 <- M2 + (M2 - M1) * magnitude
   }
 
-  ## Check the label
-  check.class(label, "logical")
+  ## Check the labels
+  check.class(labels, "logical")
 
   ## Check the axes
   check.class(axes, "logical")
@@ -195,7 +195,7 @@ plot.procrustes.var <- function(M1, M2, col = list("grey", "black"), col.val, ma
 
     ## Overwriting the parameters
     if(!all(is.na(match_names))) {
-      grid_par[which(!is.na(match_names))] <- gridPar[na.omit(match_names)]
+      grid_par[which(!is.na(match_names))] <- gridPar[stats::na.omit(match_names)]
     }
   }
 
@@ -264,8 +264,8 @@ plot.procrustes.var <- function(M1, M2, col = list("grey", "black"), col.val, ma
       graphics::plot(M1, asp = 1, type = "n", xlab = "", ylab = "", xlim = limits(M1[, 1], 1.25), axes = FALSE, ylim = limits(M1[, 2], 1.25), ...)
     }
 
-    if(label) {
-      graphics::text(M1, label = paste(1:dim(M1)[1]), adj = grid_par$txt.adj, pos = grid_par$txt.pos, cex = grid_par$txt.cex, col = grid_par$txt.col)
+    if(labels) {
+      graphics::text(M1, labels = paste(1:dim(M1)[1]), adj = grid_par$txt.adj, pos = grid_par$txt.pos, cex = grid_par$txt.cex, col = grid_par$txt.col)
     }
 
     graphics::arrows(M1[, 1], M1[, 2], M2[, 1], M2[, 2], length = 0.075, lwd = 2, col = col_vector)
@@ -278,14 +278,14 @@ plot.procrustes.var <- function(M1, M2, col = list("grey", "black"), col.val, ma
 }
 
   ## 3D plots
-  if(k == 3) {
+  if(dim == 3) {
 
     if(axes) {
       rgl::plot3d(M1, type = "s", col = col_points, size = grid_par$pt.size, aspect = FALSE, ...)
     } else {
       rgl::plot3d(M1, type = "s", col = col_points, size = grid_par$pt.size, aspect = FALSE, xlab = "", ylab = "", zlab = "", axes = FALSE, ...)
     }
-    if(label) {
+    if(labels) {
       rgl::text3d(M1, texts = paste(1:dim(M1)[1]), adj = (grid_par$txt.adj + grid_par$pt.size), pos = (grid_par$txt.pos + grid_par$pt.size), cex = grid_par$txt.cex, col = grid_par$txt.col)
     } 
 
