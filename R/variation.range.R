@@ -234,7 +234,6 @@ variation.range <- function(procrustes, type = "spherical", angle = "degree", wh
         variation_range <- coordinates.difference(min_coordinates, max_coordinates, type = type, angle = angle)[[1]]
 
         ## Finding the max/min specimen
-        # warning("max/min coordinate configurations reflect PC minima/maxima of the PC axis specified for variation.range.", call. = FALSE)
         if(length(axis) != 1) {
             axis <- axis[1]
         }
@@ -246,6 +245,7 @@ variation.range <- function(procrustes, type = "spherical", angle = "degree", wh
         return(list("range" = variation_range, "min.max" = c(min_specimenID, max_specimenID)))
     } else {
         if(return.ID) {
+            warning("Returned min and max specimen do not correspond to the PC min/max hypothetical specimen but to the nearest observed ones.\nUse geomorph::plotTangentSpace(...)$pc.shapes coordinates instead.", call. = FALSE)
             return(list("range" = variation_range, "min.max" = c(min_specimenID, max_specimenID)))
         } else {
             return(variation_range)

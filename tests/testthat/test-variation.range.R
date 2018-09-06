@@ -46,7 +46,7 @@ test_that("variation.range sanitizing works", {
     expect_warning(test095 <- variation.range(proc_super_2D, ordination = TRUE, CI = 0.95))
     test100 <- variation.range(proc_super_2D, ordination = TRUE)
     expect_warning(test095ID <- variation.range(proc_super_2D, ordination = TRUE, CI = 0.95, axis = 1, return.ID = TRUE))
-    test100ID <- variation.range(proc_super_2D, ordination = TRUE, axis = c(1,2), return.ID = TRUE)
+    expect_warning(test100ID <- variation.range(proc_super_2D, ordination = TRUE, axis = c(1,2), return.ID = TRUE))
     
     expect_is(test095, "matrix")
     expect_is(test100, "matrix")
