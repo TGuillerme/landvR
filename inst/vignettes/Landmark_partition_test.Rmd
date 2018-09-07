@@ -1,0 +1,181 @@
+---
+title: "Testing the variation in landmark position"
+author: "Thomas Guillerme"
+bibliography: references.bib
+date: "`r Sys.Date()`"
+output:
+  html_document:
+  pdf_document:
+    fig_width: 8
+    fig_height: 4
+---
+
+To test the variation in landmark position among different specimens and different anatomical regions, we can apply the landmark partition test described in details below.
+This vignette contains the theoretical description of the test followed by a step by step tutorial of the implementation of the test in `landvR`.
+
+# What does it do?
+
+Really briefly this test does:
+
+ 1. Measure the range of each landmark's variation in the Procrustes space
+ 2. Use a principal component axis do determine partitions with most landmark variation
+ 3. Test whether the variation in the hypothesised partition is greater or smaller than the other landmarks
+
+We can use a permutation test to test the following statistical hypotheses:
+
+ * $H_{0}: \Theta_{0} = \Theta$. The landmark variation in the tested partition is equal to the one in the whole population of landmarks
+ * $H_{1}: \Theta_{0} \neq \Theta$. The landmark variation in the tested partition is _not_ equal to the one in the whole population.
+
+Note that the alternative hypothesis is two-sided here but can be set to $>$ or $<$.
+
+# Landmark partition test
+
+## Requirements and data
+
+### The packages
+
+This test will be using the `landvR` package from github and will require `devtools` and `geomorph` from the CRAN.
+All these packages can be loaded easily as follows
+
+```{r, message = FALSE, warning = FALSE}
+## Loading the libraries (and installing if necessary)
+if(!require(devtools)) install.packages("devtools")
+if(!require(geomorph)) install.packages("geomorph")
+if(!require(landvR)) install_github("TGuillerme/landvR")
+
+## Setting a random seed for the repeatability of this tutorial
+set.seed(42)
+```
+
+### The data
+
+This whole method is based on Procrustes superimpositions that can be easily done through the `geomorph` package (see the `geomorph` manual and especially the function `gpagen` for more details).
+For this example, we will be using the `plethodon` dataset from the `geomorph` `R` package.
+
+```{r}
+## Loading the dataset
+data(plethodon)
+
+## Generating a Procrustes superimposition
+procrustes <- gpagen(plethodon$land, print.progress = FALSE)
+```
+
+This results in a dataset of 40 Procrustes superimposition of 12 landmarks each:
+
+```{r}
+procrustes
+```
+
+## Measuring the range of variation for each landmark
+
+Landmark variation can be measured in different ways described in more details in the `?variation.range` function manual.
+For this example, we will only consider the radius of the polar coordinates landmark difference between specimens as the range of variation for each landmark. In other words when one landmark has a big range of variation of one specimen it means that this specimen's landmark is further away from the mean specimen equivalent landmark.
+
+In more technical details, the range of variation is calculate as the difference in length between a pair of homologous landmarks.
+This is calculated using a spherical coordinate system expressed by three parameters: (1) the radius ($\rho$, the euclidean distance between the two landmarks); (2) the azimuth angle ($\phi$, the angle on the equatorial plan); and (3) the polar angle ($\theta$, the angle measured on the polar plan).
+Since we are only interested in the _magnitude_ of difference ($\rho$) regardless of the direction ($\phi$ and $\theta$) we will use only the radius below.
+
+This can be calculated in `landvR` easily by using the `coordinates.difference` function.
+For example, the following will measure the polar coordinates differences for all the specimens from the consensus Procrustes shape:
+
+```{r}
+## Measuring the spherical coordinates differences from the mean
+differences_from_mean <- coordinates.difference(coordinates = procrustes$coords,
+                                               reference = procrustes$consensus, type = "spherical")
+```
+
+This results in a list of coordinates for each specimen.
+For example, to look at the differences between the first specimen and the consensus in terms of spherical coordinates, one can call:
+
+```{r}
+## The differences between the first specimen and the mean in terms of spherical coordinates
+differences_from_mean[[1]]
+```
+
+> Note that the angles are expressed in degrees here (column `$azimuth`) but they can be measured in radian using the `angle` option in `coordinates.difference`.
+
+The radius of spherical coordinates differences for all the specimens to the mean specimen is equivalent to listing all the vectors between each mean landmark position and each specimens' one.
+In small datasets like here, this can be easily visualised using the following:
+
+```{r}
+## Graphical parameters
+par(mar = c(0, 0, 0, 0))
+## The variation range between the consensus and the first specimen
+procrustes.var.plot(procrustes$consensus, procrustes$coords[, , 1])
+```
+
+Here the grey dots are the landmarks' mean positions and the black arrows are the distances from these positions to the first specimen landmarks.
+The length of these black arrows is equal to the values in the column `$radius` in the table above.
+
+## Using the PCA to determine hypothesis
+
+Using this system of coordinates, we can use a principal component analysis (PCA) to select the major axis of variation in terms of landmark coordinates displacement (Principal Coordinate 1 - PC1) to propose so biological hypothesis.
+
+First we need to ordinate the data
+
+```{r}
+## Transforming the data into a 2 dimensional array
+procrustes_2d_array <- geomorph::two.d.array(procrustes$coords)
+
+## Ordinating the data
+ordination <- stats::prcomp(procrustes_2d_array)
+```
+
+We can then measure the difference in terms of spherical coordinates between the two extreme hypothetical specimens along the PC1.
+This can be done easily using the `variation.range` function (more on that later):
+
+```{r}
+## Calculating the coordinate differences between the two extreme hypothetical specimens on PC1
+PC1_variation <- variation.range(procrustes, axis = 1, ordination = ordination, type = "spherical")
+
+## The range of hypothetical variation
+PC1_variation
+```
+
+As we will see later, this function can be used to select the actual specimens closest to this range.
+Nonetheless, we can use this information to plot the main variation (on PC1) on real specimens to propose some biological hypothesis based on the landmark variation.
+To generate the coordinates of the hypothetical specimens, we can use the `plotTangentSpace` function from `geomorph`:
+
+```{r}
+## Wrapping the specimens on the tangent space
+wrap_PCA <- plotTangentSpace(procrustes$coords, verbose = FALSE)
+```
+
+The two most extreme specimens on the first axis of the PCA are the ones plotted with on the deformed meshes.
+
+We can then plot the coordinates of the hypothetical specimens along the first PC axis and the range of landmark variation using the `procrustes.var.plot` function in `landvR`:
+
+
+```{r}
+## Selecting the specimens
+hypothetical_1 <- wrap_PCA$pc.shapes[[1]]
+hypothetical_2 <- wrap_PCA$pc.shapes[[2]]
+
+## Plotting the range of variation using a heat colour code and the PC1 variation range
+procrustes.var.plot(hypothetical_1, hypothetical_2, col = heat.colors, 
+                    col.val = PC1_variation[, "radius"], labels = TRUE)
+```
+
+From this plot, we can hypothesise that the variation in landmark change seems to be concentrated in the the landmarks on the right hand side of the plot (landmarks 2, 11 and 12).
+This could be tested using the PCA data but would certainly lead to some circularity (i.e. we cannot use the PCA to determine that landmarks 2, 11 and 12 vary the most and then use the same PCA data to test it).
+We can thus use the observed data from the Procrustes superimposition to test it.
+
+
+## Testing the hypothesis
+
+
+
+# Going further
+
+
+## Variation between extremes
+
+
+## Further considerations
+
+
+
+
+
+
+## References
