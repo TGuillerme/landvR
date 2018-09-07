@@ -160,8 +160,191 @@ From this plot, we can hypothesise that the variation in landmark change seems t
 This could be tested using the PCA data but would certainly lead to some circularity (i.e. we cannot use the PCA to determine that landmarks 2, 11 and 12 vary the most and then use the same PCA data to test it).
 We can thus use the observed data from the Procrustes superimposition to test it.
 
-
 ## Testing the hypothesis
+
+First let's divide our landmark into two distinct datasets.
+
+```{r}
+## The "front of the skull" partition
+land_fron <- c(2, 11, 12)
+
+## The "back of the skull" partition
+land_back <- seq(1:12)[-land_fron]
+
+## Listing them for later
+partitions <- list("front" = land_fron, "back" = land_back)
+```
+
+The idea is to see whether the landmark variation is greater in the landmarks in the front of the skull and relatively smaller in the back of the skull.
+We can measure that using two different statistics:
+ 
+ * The **area difference** that is the proxy of the cumulative landmark variation
+ * The **Bhattacharyya Coefficient** which is the probability of overlap between two distributions
+
+Of course, any other type of statistics can be used in the test that follows.
+These two however are a pretty intuitive proxy for testing our hypothesis above.
+
+### The Area difference
+
+This statistic can be measured as follows:
+
+$\Delta_{area} = \int_{0}^{n-1} (f_{x} - f_{y})d(x,y)$
+
+Where _n_ is minimum number of comparable landmarks and $f_{x}$ and $f_{y}$ are ranked functions (i.e. $f_{0} \geq f_{1} \geq f_{2} ...$) for the landmarks in the partition and all the landmarks respectively.
+If one of the functions $f_{x}$ or $f_{y}$ have _m_ elements (with $m > n$) $f^{*}_{z}$, a rarefied estimated of the function with _m_ elements is used instead.
+
+$\int_{0}^{n-1}f^*_{z}d(z) = \frac{\sum_1^p\int f^*_{zi}}{s}$
+
+Where _s_ is the number of rarefaction replicates.
+_s_ is chosen based on the Silverman's rule of thumb for choosing the bandwidth of a Gaussian kernel density estimator multiplied by 1000 with a result forced to be 100 $\leq p \leq$ 1000 [@silverman1986density].
+This rule of thumb is implemented in `R` in the `bw.nrd0` (a bandwith selector for Kernel Density estimations)
+
+This statistic is implemented in `landvR` in the `area.diff` function that simply intakes two distributions:
+
+```{r}
+## Two random distributions
+distribution_1 <- rnorm(10)
+distribution_2 <- rnorm(10)
+
+## Their area difference
+area.diff(distribution_1, distribution_2)
+```
+
+### Probability of overlap between size differences (Bhattacharyya Coefficient)
+
+The Bhattacharyya Coefficient calculates the probability of overlap of two distributions [@Bhattacharyya; Guillerme2016146].
+When it is equal to zero, the probability of overlap of the distributions is also zero, and when it is equal to one, the two distributions are entirely overlapping.
+It forms an elegant and easy to compute continuous measurement of the probability of similarity between two distributions.
+The coefficient is calculated as the sum of the square root of the relative counts shared in _n_ bins among two distributions:
+
+$BC=\sum_{i=1}^{n} \sqrt{{\sum{a_i}}\times{\sum{b_i}}}$
+
+Where ${a_i}$ and ${b_i}$  are the number of counts in bin _i_ for the distributions _a_ and _b_ respectively divided by the total number of counts in the distribution _a_ and _b_ respectively.
+_n_ was determined using the Silverman's rule of thumb (see above).
+
+This statistic is implemented in the `dispRity` package in the `bhatt.coeff` function that intakes the same arguments as `area.diff`:
+
+```{r}
+## Their probability of overlap
+bhatt.coeff(distribution_1, distribution_2)
+```
+
+### Random permutation test
+
+Now that we have two statistics (note that one could be sufficient), we can finally test our hypothesis using a random permutation test.
+This test measures for on statistic between two populations (e.g. the area difference between the landmarks variation in the front or the back of the skull) come from the same global statistical population (H0) or different ones (H1).
+
+First we measured the statistic between the landmark partition of interest and all the other landmarks (including the ones from the partition).
+Second, we generated 1000 statistics by randomly sampling the same number of landmarks as in the partition in the whole distributions and compared them again to the full distribution.
+This resulted in 1000 null comparisons (i.e. assuming the null hypothesis that the statistic in the partition is the same as the statistic in the total distribution).
+We then calculated the _p_ value based on:
+
+$p=\frac{\sum_1^B\left(random_{i} >= observed\right)+1}{B + 1}$
+
+Where _B_ is the number of random draws (1000 bootstrap pseudo-replicates), $random_{i}$ is the $i^{th}$ statistic from the comparison of the $i^{th}$ randomly drawn partition and the distribution and $observed$ is the observed statistic between the partition and the distribution.
+
+
+### Selecting the range of variation
+
+First we will need to calculate the range of variation between or specimen of interest.
+In fact, the range of variation measured above was based on the hypothetical PC1 extremes, we thus need to have some kind of variation based on the actual Procrustes specimens to test our hypothesis.
+In practice, we need to select two specimens on which to apply the `coordinates.difference` function detailed above.
+We could for example decide to consider:
+
+ 1. the range between two species using their mean shapes
+ 2. the range within one species using their most different shapes
+ 3. the range within one species using the 0.95 confidence interval (CI) between their most different shapes
+
+Note that there are many other ways to select this range of variation but only these three will be detailed here:
+
+
+#### Range between two species
+
+For this, we can use a simple function `select.procrustes` that will calculate the mean shape for different subsets of a dataset.
+The `plethodon` dataset contains information on two sets of species stored in `plethodon$species`.
+We can use this data to select the Procrustes means for each species.
+
+The `select.procrustes` function intakes a Procrustes dataset, a list of species and a function to use for summarising each groups (here we want the `mean` of each group).
+
+```{r}
+## Making the list of species
+species_list <- list("Jord" = which(plethodon$species == "Jord"),
+                    "Teyah" = which(plethodon$species == "Teyah"))
+
+## Selecting the procrustes means for each species
+species_means <- select.procrustes(procrustes, factors = species_list)
+
+## The list of both species means
+species_means
+```
+
+We can then use the `coordinates.difference` function as detailed above to get the range of difference between both species means:
+
+```{r}
+## Species means differences
+species_means_difference <- coordinates.difference(species_means[[1]], species_means[[1]],
+                                                   type = "spherical")
+```
+
+#### Range within one species using the most extreme shapes
+
+When looking at variation within one single species (or a pool of two species as in the example here), we can calculate the range of landmark variation (here the two individuals with the most different radii) using the following algorithm:
+
+ 1. Calculate the radii for all _n_ landmarks between the mean Procrustes superimposition and each specimen's superimposition.
+ 2. Rank each set of _n_ radii and measure the area under the resulting curve.
+ 3. Select the specimen with the highest _n_ radii area. This is now the "X" Procrustes (i.e. the specimen with the most different shape compared to the mean).
+ 4. Calculate the radii for all _n_ landmarks between the "X" Procrustes and the remaining individual ones.
+ 5. Repeat step 2 and 3. The resulting specimen with the highest _n_ radii area is now the "Y" Procrustes (i.e. the specimen with the most different shape compared to the "X" Procrustes).
+
+These two "X" and "Y" Procrustes superimpositions are not the biggest/smallest, widest/narowest, etc. features _per se_ but rather the two extremes of the overall distribution of landmark variation ($\rho$).
+Also, note that we use the radii here as an optimisation for differentiating our specimens but any other measurement can be used.
+
+This algorithm is implemented in the `variation.range` function that we used a bit above (but without the ordination arguments).
+This function simply intakes the set of landmarks, the type of difference to measure (`"spherical"`) and what to use for the optimisation (`"radius"`):
+
+```{r}
+## Measuring the range of variation between the two most extreme specimens
+all_spec_difference <- variation.range(procrustes, type = "spherical", what = "radius",
+                                       return.ID = TRUE)
+```
+
+#### Range within one species using the 0.95 CI
+
+One of the problems using the algorithm above can occur when the distribution contains outliers that could artificially increase this range of variation.
+One easy way to correct for that is to consider the same algorithm described above but rather than selecting the specimen "X" or "Y" the furthest away from respectively the mean or "X", we can use the one the furthest away excluding the last 5% of variation.
+This is done easily through the `CI` argument in the `variation.range` function:
+
+```{r}
+## Measuring the range of variation between the 0.95 CI extreme specimens
+ci95_spec_difference <- variation.range(procrustes, type = "spherical", what = "radius", CI = 0.95,
+                                       return.ID = TRUE)
+```
+
+Note that the resulting specimens should be different in both cases:
+
+```{r}
+## The two most extreme specimens
+all_spec_difference$min.max
+
+## The 0.95 CI extreme specimens
+ci95_spec_difference$min.max
+```
+
+### Running the permutation test
+
+We can use the `rand.test` function from `landvR` that's based on a modification from the `as.randtest` function from the `ade4` package [@thioulouse1997ade]).
+This function allows to pass the statistic as a function to the `test` argument as follows.
+
+
+```{r}
+## Calculating the range of variation
+
+
+
+## The random permutation test for the area difference
+rand.test(data[, "radius"], partition, test = area.diff, test.parameter = cTRUE)
+
+```
 
 
 
