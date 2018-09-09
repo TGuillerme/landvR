@@ -34,13 +34,14 @@ Note that the alternative hypothesis is two-sided here but can be set to $>$ or 
 
 ### The packages
 
-This test will be using the `landvR` package from github and will require `devtools` and `geomorph` from the CRAN.
+This test will be using the `landvR` package from github and will require `devtools`, `geomorph` and `dispRity` from the CRAN.
 All these packages can be loaded easily as follows
 
 ```{r, message = FALSE, warning = FALSE}
 ## Loading the libraries (and installing if necessary)
 if(!require(devtools)) install.packages("devtools")
 if(!require(geomorph)) install.packages("geomorph")
+if(!require(dispRity)) install.packages("dispRity")
 if(!require(landvR)) install_github("TGuillerme/landvR")
 
 ## Setting a random seed for the repeatability of this tutorial
@@ -60,11 +61,7 @@ data(plethodon)
 procrustes <- gpagen(plethodon$land, print.progress = FALSE)
 ```
 
-This results in a dataset of 40 Procrustes superimposition of 12 landmarks each:
-
-```{r}
-procrustes
-```
+This results in a dataset of 40 Procrustes superimposition of 12 landmarks each.
 
 ## Measuring the range of variation for each landmark
 
@@ -166,13 +163,7 @@ First let's divide our landmark into two distinct datasets.
 
 ```{r}
 ## The "front of the skull" partition
-land_fron <- c(2, 11, 12)
-
-## The "back of the skull" partition
-land_back <- seq(1:12)[-land_fron]
-
-## Listing them for later
-partitions <- list("front" = land_fron, "back" = land_back)
+land_front <- c(2, 11, 12)
 ```
 
 The idea is to see whether the landmark variation is greater in the landmarks in the front of the skull and relatively smaller in the back of the skull.
@@ -282,7 +273,7 @@ We can then use the `coordinates.difference` function as detailed above to get t
 
 ```{r}
 ## Species means differences
-species_means_difference <- coordinates.difference(species_means[[1]], species_means[[1]],
+species_means_difference <- coordinates.difference(species_means[[1]], species_means[[2]],
                                                    type = "spherical")
 ```
 
@@ -334,31 +325,67 @@ ci95_spec_difference$min.max
 
 We can use the `rand.test` function from `landvR` that's based on a modification from the `as.randtest` function from the `ade4` package [@thioulouse1997ade]).
 This function allows to pass the statistic as a function to the `test` argument as follows.
-
+We can use the argument `test.parameter` to calculate the _p_ value as outlined above (note that by default, these tests are two sided).
 
 ```{r}
-## Calculating the range of variation
+## The random permutation test for the area difference between species
+sp_mean_test_area <- rand.test(species_means_difference[[1]][, "radius"], subset = land_front,
+                               test = area.diff, test.parameter = TRUE)
+## The random permutation test for the probability of overlap between species
+sp_mean_test_bc <- rand.test(species_means_difference[[1]][, "radius"], subset = land_front,
+                            test = bhatt.coeff, test.parameter = TRUE)
 
+## The random permutation test for the area difference within both species
+all_sp_test_area <- rand.test(all_spec_difference$range[, "radius"], subset = land_front,
+                              test = area.diff, test.parameter = TRUE)
+## The random permutation test for the probability of overlap within both species
+all_sp_test_bc <- rand.test(all_spec_difference$range[, "radius"], subset = land_front,
+                            test = bhatt.coeff, test.parameter = TRUE)
 
-
-## The random permutation test for the area difference
-rand.test(data[, "radius"], partition, test = area.diff, test.parameter = cTRUE)
+## The random permutation test for the area difference within both species
+ci95_sp_test_area <- rand.test(ci95_spec_difference$range[, "radius"], subset = land_front,
+                               test = area.diff, test.parameter = TRUE)
+## The random permutation test for the probability of overlap within both species
+ci95_sp_test_bc <- rand.test(ci95_spec_difference$range[, "radius"], subset = land_front,
+                             test = bhatt.coeff, test.parameter = TRUE)
 
 ```
 
+Each test can be summarised as a S3 `randtest` object by simply calling them as follows:
 
+```{r}
+sp_mean_test_area
+```
 
-# Going further
+The `Observation` value is the observed statistic in the subset.
+For example, this can be the area difference or the probability of overlap in landmark displacement between the two tested specimens in the tested subset (here the front of the skull).
+This value is then compared to 100 replicated random values that are equivalent of measuring this statistic over any randomly picked landmark displacements.
+The _p_ value will indicate the type I error when rejecting the null hypothesis (that is: the landmarks in the subset are not different than the other).
 
+To facilitate interpreting these results, it is possible to plot them:
 
-## Variation between extremes
+```{r, fig.width = 12, fig.height = 18}
+## Graphical parameters
+par(mfrow = c(3,2))
 
+## Plotting one result
+plot(sp_mean_test_area, main = "Species mean area difference")
+## Adding the p value
+legend("topright", legend = paste("p =", round(sp_mean_test_area$pvalue, 3)), bty = "n")
 
-## Further considerations
+## Plotting the other results
+plot(sp_mean_test_bc, main = "Species mean Bhattacharyya Coefficient")
+legend("topright", legend = paste("p =", round(sp_mean_test_bc$pvalue, 3)), bty = "n")
 
+plot(all_sp_test_area, main = "Overall range area difference")
+legend("topright", legend = paste("p =", round(all_sp_test_area$pvalue, 3)), bty = "n")
+plot(all_sp_test_bc, main = "Overall range Bhattacharyya Coefficient")
+legend("topright", legend = paste("p =", round(all_sp_test_bc$pvalue, 3)), bty = "n")
 
-
-
-
+plot(ci95_sp_test_area, main = "Overall range area difference")
+legend("topright", legend = paste("p =", round(ci95_sp_test_area$pvalue, 3)), bty = "n")
+plot(ci95_sp_test_bc, main = "Overall range Bhattacharyya Coefficient")
+legend("topright", legend = paste("p =", round(ci95_sp_test_bc$pvalue, 3)), bty = "n")
+```
 
 ## References
