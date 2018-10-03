@@ -10,7 +10,7 @@ Development (master):
 
 [![Build Status](https://travis-ci.org/TGuillerme/landvR.svg?branch=master)](https://travis-ci.org/TGuillerme/landvR)
 [![codecov](https://codecov.io/gh/TGuillerme/landvR/branch/master/graph/badge.svg)](https://codecov.io/gh/TGuillerme/landvR)
-[![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](http://www.repostatus.org/badges/latest/wip.svg)](http://www.repostatus.org/#wip)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![develVersion](https://img.shields.io/badge/devel%20version-0.1-green.svg?style=flat)](https://github.com/TGuillerme/landvR)
 <!-- [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.846254.svg)](https://doi.org/10.5281/zenodo.846254)
  -->
@@ -25,12 +25,12 @@ Check out the [paper](https://besjournals.onlinelibrary.wiley.com/doi/abs/10.111
 if(!require(devtools)) install.packages("devtools")
 library(devtools)
 install_github("TGuillerme/landvR", ref = "release")
-library(dispRity)
+library(landvR)
 ```
 
 ## Vignettes and manuals
 
-A detailed vignette for performing the landmark Procrustes coordinates variation test is available [online](https://rawgit.com/TGuillerme/...) or as a [pdf](https://rawgit.com/TGuillerme/...):
+A detailed vignette for performing the landmark Procrustes coordinates variation test is available [online](https://cdn.rawgit.com/TGuillerme/landvR/8a6a6bd5/inst/vignettes/Landmark_partition_test.html) or as in  [Rmd](hhttps://github.com/TGuillerme/landvR/blob/master/inst/vignettes/Landmark_partition_test.Rmd).
 
 ## Latest patch notes
 * 2018/07/23 - v0.1
