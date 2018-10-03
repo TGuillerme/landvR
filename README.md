@@ -30,7 +30,7 @@ library(landvR)
 
 ## Vignettes and manuals
 
-A detailed vignette for performing the landmark Procrustes coordinates variation test is available [online](https://cdn.rawgit.com/TGuillerme/landvR/8a6a6bd5/inst/vignettes/Landmark_partition_test.html) or as in  [Rmd](hhttps://github.com/TGuillerme/landvR/blob/master/inst/vignettes/Landmark_partition_test.Rmd).
+A detailed vignette for performing the landmark Procrustes coordinates variation test is available [online](https://cdn.rawgit.com/TGuillerme/landvR/8a6a6bd5/inst/vignettes/Landmark_partition_test.html) or as in [Rmd](https://github.com/TGuillerme/landvR/blob/master/inst/vignettes/Landmark_partition_test.Rmd).
 
 ## Latest patch notes
 * 2018/07/23 - v0.1
