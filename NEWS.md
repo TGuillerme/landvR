@@ -26,4 +26,4 @@ landvR v0.1 (2018-07-23)
 
 ### NEW FEATURES
 
-  * New functions
+  * First release!
