@@ -94,7 +94,7 @@ differences_from_mean[[1]]
 The radius of spherical coordinates differences for all the specimens to the mean specimen is equivalent to listing all the vectors between each mean landmark position and each specimens' one.
 In small datasets like here, this can be easily visualised using the following:
 
-```{r}
+```{r, fig.height = 8, fig.width = 8}
 ## Graphical parameters
 par(mar = c(0, 0, 0, 0))
 ## The variation range between the consensus and the first specimen
@@ -106,7 +106,7 @@ The length of these black arrows is equal to the values in the column `$radius` 
 
 ## Using the PCA to determine hypothesis
 
-Using this system of coordinates, we can use a principal component analysis (PCA) to select the major axis of variation in terms of landmark coordinates displacement (Principal Coordinate 1 - PC1) to propose so biological hypothesis.
+Using this system of coordinates, we can use a principal component analysis (PCA) to select the major axis of variation in terms of landmark coordinates displacement (along the first principal coordinate - PC1) to propose so biological hypothesis.
 
 First we need to ordinate the data
 
@@ -133,7 +133,7 @@ As we will see later, this function can be used to select the actual specimens c
 Nonetheless, we can use this information to plot the main variation (on PC1) on real specimens to propose some biological hypothesis based on the landmark variation.
 To generate the coordinates of the hypothetical specimens, we can use the `plotTangentSpace` function from `geomorph`:
 
-```{r}
+```{r, fig.height = 8, fig.width = 8}
 ## Wrapping the specimens on the tangent space
 wrap_PCA <- plotTangentSpace(procrustes$coords, verbose = FALSE)
 ```
@@ -145,8 +145,8 @@ We can then plot the coordinates of the hypothetical specimens along the first P
 
 ```{r}
 ## Selecting the specimens
-hypothetical_1 <- wrap_PCA$pc.shapes[[1]]
-hypothetical_2 <- wrap_PCA$pc.shapes[[2]]
+hypothetical_1 <- wrap_PCA$pc.shapes$PC1min
+hypothetical_2 <- wrap_PCA$pc.shapes$PC1max
 
 ## Plotting the range of variation using a heat colour code and the PC1 variation range
 procrustes.var.plot(hypothetical_1, hypothetical_2, col = heat.colors, 
@@ -156,6 +156,17 @@ procrustes.var.plot(hypothetical_1, hypothetical_2, col = heat.colors,
 From this plot, we can hypothesise that the variation in landmark change seems to be concentrated in the the landmarks on the right hand side of the plot (landmarks 2, 11 and 12).
 This could be tested using the PCA data but would certainly lead to some circularity (i.e. we cannot use the PCA to determine that landmarks 2, 11 and 12 vary the most and then use the same PCA data to test it).
 We can thus use the observed data from the Procrustes superimposition to test it.
+
+
+Note that the coordinates differences calculated from either `plotTangentSpace` (`hypothetical_1` and `hypothetical_2`) and from `variation.range` are identical:
+
+```{r}
+## Measuring the difference directly from the hypothetical shapes from plotTangentSpace
+var_from_geomorph <- coordinates.difference(hypothetical_1, hypothetical_2, type = "spherical")[[1]]
+
+## The results are equal to the ones from the variation.range function (up to the 13th digit!)
+all(round(var_from_geomorph, 13) == round(PC1_variation, 13))
+```
 
 ## Testing the hypothesis
 
