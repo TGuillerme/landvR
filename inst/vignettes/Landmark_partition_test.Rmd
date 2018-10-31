@@ -104,7 +104,8 @@ procrustes.var.plot(procrustes$consensus, procrustes$coords[, , 1])
 Here the grey dots are the landmarks' mean positions and the black arrows are the distances from these positions to the first specimen landmarks.
 The length of these black arrows is equal to the values in the column `$radius` in the table above.
 
-## Using the PCA to determine hypothesis
+## PCA-based hypothesis construction
+<!-- Using the PCA to determine hypothesis -->
 
 Using this system of coordinates, we can use a principal component analysis (PCA) to select the major axis of variation in terms of landmark coordinates displacement (along the first principal coordinate - PC1) to propose so biological hypothesis.
 
