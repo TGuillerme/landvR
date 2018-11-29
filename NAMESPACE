@@ -2,8 +2,10 @@
 
 export(add.rare.plot)
 export(area.diff)
+export(array.to)
 export(coordinates.area)
 export(coordinates.difference)
+export(linear.dist)
 export(procrustes.var.plot)
 export(rand.test)
 export(select.procrustes)
