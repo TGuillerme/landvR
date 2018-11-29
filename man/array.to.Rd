@@ -26,7 +26,7 @@ procrustes <- geomorph::gpagen(plethodon$land, print.progress = FALSE)
 array.to(procrustes, "list")
 
 ## Transforming it into a matrix
-#' array.to(procrustes, "matrix")
+array.to(procrustes, "matrix")
 
 }
 \seealso{

@@ -2,24 +2,37 @@
 #'
 #' @description Selects specific values of specimens from a Procrustes superimposition
 #'
-#' @param procrustes Procrustes data of class \code{"gpagen"} or an \code{array} of coordinates.
+#' @param procrustes Procrustes data of class \code{"gpagen"} or an \code{"array"} or \code{"list"} of coordinates.
 #' @param selector A \code{function} of which values to select (default = \code{\link{mean}}).
 #' @param factors A \code{list} of elements names or IDs to split the data.
-#' @param specimen Whether to return the values of the estimated selector (\code{FALSE} - default - a non-existing specimen) or the specimen the closest to the the estimated selector (\code{TRUE}).
+# @param specimen Whether to return the values of the estimated selector (\code{FALSE} - default - a non-existing specimen) or the specimen the closest to the the estimated selector (\code{TRUE}).
 #' 
 #' @return
-#' A procrustes value
+#' The coordinates of a hypothetical specimen (e.g. the mean specimen).
 #' 
-#' A specimen number
 #' 
 #' @examples
+#' ## Loading the plethodon dataset
+#' require(geomorph)
+#' data(plethodon)
+#' 
+#' ## Performing a procrustes superimposition
+#' procrustes <- geomorph::gpagen(plethodon$land, print.progress = FALSE)
+#' 
+#' ## Selecting the mean Procrustes
+#' mean_procrustes <- select.procrustes(procrustes, selector = mean)
 #'
+#' ## Selecting the minimum Procrustes shape for each species
+#' min_procrustes <- select.procrustes(procrustes, selector = min,
+#'                                     factors = list(which(plethodon$species == "Jord"),
+#'                                                    which(plethodon$species == "Teyah")))
+#' 
 #' @seealso
 #' 
 #' @author Thomas Guillerme
 #' @export
 
-select.procrustes <- function(procrustes, selector = mean, factors, specimen = FALSE) {
+select.procrustes <- function(procrustes, selector = mean, factors){#, specimen = FALSE) {
 
     match_call <- match.call()
 
@@ -34,7 +47,8 @@ select.procrustes <- function(procrustes, selector = mean, factors, specimen = F
     }
 
     ## specimen
-    check.class(specimen, "logical")
+    # check.class(specimen, "logical")
+    specimen <- FALSE
 
     ## Transform into array format
     if(class_procrustes != "array") {

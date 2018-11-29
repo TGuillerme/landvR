@@ -4,26 +4,36 @@
 \alias{select.procrustes}
 \title{Select Procrustes values}
 \usage{
-select.procrustes(procrustes, selector = mean, factors, specimen = FALSE)
+select.procrustes(procrustes, selector = mean, factors)
 }
 \arguments{
-\item{procrustes}{Procrustes data of class \code{"gpagen"} or an \code{array} of coordinates.}
+\item{procrustes}{Procrustes data of class \code{"gpagen"} or an \code{"array"} or \code{"list"} of coordinates.}
 
 \item{selector}{A \code{function} of which values to select (default = \code{\link{mean}}).}
 
 \item{factors}{A \code{list} of elements names or IDs to split the data.}
-
-\item{specimen}{Whether to return the values of the estimated selector (\code{FALSE} - default - a non-existing specimen) or the specimen the closest to the the estimated selector (\code{TRUE}).}
 }
 \value{
-A procrustes value
-
-A specimen number
+The coordinates of a hypothetical specimen (e.g. the mean specimen).
 }
 \description{
 Selects specific values of specimens from a Procrustes superimposition
 }
 \examples{
+## Loading the plethodon dataset
+require(geomorph)
+data(plethodon)
+
+## Performing a procrustes superimposition
+procrustes <- geomorph::gpagen(plethodon$land, print.progress = FALSE)
+
+## Selecting the mean Procrustes
+mean_procrustes <- select.procrustes(procrustes, selector = mean)
+
+## Selecting the minimum Procrustes shape for each species
+min_procrustes <- select.procrustes(procrustes, selector = min,
+                                    factors = list(which(plethodon$species == "Jord"),
+                                                   which(plethodon$species == "Teyah")))
 
 }
 \seealso{
