@@ -1,0 +1,165 @@
+---
+title: "Procrustes distance or area of landmark variation?"
+author: "Thomas Guillerme"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    fig_width: 12
+    fig_height: 6
+---
+
+What is the difference between the Procrustes distance as used in `geomorph` or the cumulative landmark variation (or area difference between landmark displacement)?
+Both are different methods do differentiate specimens from another specimen (usually the mean shape) and are based on their landmark configuration.
+However, they differ in terms of the obtained results:
+
+# Definitions:
+
+## Procrustes distance
+
+The Procrustes distance (Kendall 1984, _Bulletin of the London Mathematical Society_ 16: 81–121) is the Euclidean distance in the Kendall shape space (i.e. the Euclidean distance between all the landmark coordinates between two specimens):
+
+$D_{F}(x,y) = \sqrt{\sum_{i}^{n}(x_{i}-y_{i})^2}$
+
+Where _x_ and _y_ are two specimens with _n_ landmarks each.
+
+## Cumulative landmark variation (or area difference)
+
+The cumulative landmark variation (or area difference) is defined as follows:
+
+$D_{area}(x,y) = \int_{0}^{n-1} (f_{x} - f_{y})d(x,y)$
+
+Where $f_{x}$ and $f_{y}$ are ranked functions (i.e. $f_{0} \geq f_{1} \geq f_{2} ...$) for the landmarks in the partition and all the landmarks respectively.
+
+
+## Difference between both
+
+```{r}
+## Loading the packages
+if(!require(devtools)) install.packages("devtools")
+if(!require(geomorph)) install.packages("geomorph")
+if(!require(landvR)) install_github("TGuillerme/landvR")
+```
+
+We can compare both metrics on the `geomorph` `plethodon` dataset:
+
+```{r}
+## Loading the plethodon dataset
+data(plethodon)
+
+## Performing the Procrustes superimposition
+procrustes_super <- geomorph::gpagen(plethodon$land, print.progress = FALSE)
+
+## The mean specimen shape
+mean_shape <- landvR::select.procrustes(procrustes_super, selector = mean)
+
+## Transforming the gpagen coordinates into a list
+procrustes <- landvR::array.to(procrustes_super$coords, "list")
+```
+
+We can simply calculate the Procrustes distance as follows:
+
+```{r}
+## The Procrustes distances
+proc.distance <- function(x, mean) {
+    return(dist(rbind(as.vector(x), as.vector(mean)), "euclidean"))
+}
+proc_distances <- unlist(lapply(procrustes, proc.distance, mean = mean_shape[[1]]))
+```
+
+We can then calculate the area differences as follows:
+
+
+```{r}
+## Getting the polar coordinates from the mean shape for each specimen
+spherical_diff <- coordinates.difference(procrustes, mean_shape[[1]],
+                                     type = "spherical", angle = "degree")
+
+## Getting the area differences
+area_differences <- unlist(lapply(spherical_diff, landvR::coordinates.area, what = "radius"))
+```
+
+And we can then visually compare both:
+
+```{r, fig.height = 8, fight.width = 12}
+## Ranking both set by specimens' Procrustes distances
+rank <- match(sort(proc_distances), proc_distances)
+
+## Plotting the different distances and the difference between them
+plot(proc_distances[rank], pch = 19, ylim = range(c(proc_distances, area_differences)),
+    col = "orange", xlab = "ranked specimens (Procrustes distance)", ylab = "distances")
+points(area_differences[rank], pch = 19, col = "blue")
+lines(area_differences[rank]-proc_distances[rank])
+legend("topleft", legend = c("Procrutes", "area", "difference (area - Procrustes)"),
+       pch = c(19, 19, NA), lty = c(0, 0, 1) , col = c("orange", "blue", "black"))
+```
+
+Here we can see that both distances do not scale one to one although the seem to display a similar trend (i.e. the specimen with the smaller/bigger Procrustes distance are the ones with the smaller/bigger area differences).
+
+
+## Advantages of the area difference
+
+Although the Procrustes distance has been (righlty) shown to be perfectly fine for differentiating specimens based on their configuration in the Kendall shape space (which reflects the differences between landmarks), using the area difference allows some modifications that can impact the study based on the question at hand:
+
+ * $f_{x}$ and $f_{y}$ can be defined by any function for differentiating two landmarks. This can be the distance between two landmarks (Euclidean or otherwise) or any other metric (angle, ratio, etc.).
+ * $D_{area}(x,y)$ is effectively a ranked distribution and allows more fine scale comparison between two sets of landmarks (i.e. differentiating specimens based on the ranked distribution of their landmark displacement).
+ * $D_{area}(x,y)$ reflects directly the difference in terms of distribution of landmark variation whereas $D_{F}$ reflects the difference in _specimens_ (_cf._ landmarks) in the Kendall shape space (though based on the same landmark variation.)
+
+## Visualising some more differences
+
+Comparing how the different distances react to different points (e.g. mean or median) and with different optimisations (landmark displacement length or landmark displacement angle):
+
+```{r}
+## Getting the area differences from the mean based on the angle
+angle_area_differences <- unlist(lapply(spherical_diff, landvR::coordinates.area, what = "azimuth"))
+
+## The median shape
+median_shape <- landvR::select.procrustes(procrustes_super, selector = median)
+
+## The Procrustes distances to the median
+median_proc_distances <- unlist(lapply(procrustes, proc.distance, mean = median_shape[[1]]))
+
+## Getting the polar coordinates from the mean shape for each specimen
+median_spherical_diff <- coordinates.difference(procrustes, median_shape[[1]],
+                                     type = "spherical", angle = "degree")
+
+## Getting the area differences from the median
+median_area_differences <- unlist(lapply(median_spherical_diff, landvR::coordinates.area,
+                                         what = "radius"))
+
+## Getting the area differences from the median based on the angle
+median_angle_area_differences <- unlist(lapply(median_spherical_diff, landvR::coordinates.area,
+                                               what = "azimuth"))
+```
+
+For simplifying the plot, we will scale all the distances between 0 and 1:
+
+```{r}
+## Making all the distances into a list
+distance_list <- list(proc_distances, median_proc_distances,
+                      area_differences, median_area_differences,
+                      angle_area_differences, median_angle_area_differences)
+## Scaling the distances
+distance_list <- lapply(distance_list, function(x) x/max(x))
+```
+
+And we can now plot all the different distances, again based on the ranked Procrustes distances from the mean:
+
+
+```{r, fig.height = 8, fight.width = 12}
+## The list of colours
+cols <- c("orange", "yellow", "blue", "cyan", "darkgreen", "green")
+
+## The empty plot
+plot(NULL, xlim = c(1,40), ylim = c(0,1), xlab = "ranked specimens (Procrustes distance)",
+     ylab = "distances")
+
+## The ranked/scaled distances
+for(one_dist in 1:length(distance_list)) {
+    points(distance_list[[one_dist]][rank], pch = 19, col = cols[one_dist])
+}
+
+## The legend
+legend("bottomright", pch = 19, col = cols, legend = c("Procrutes (mean)", "Procrutes (median)",
+                                                    "radius area (mean)", "radius area (median)",
+                                                    "azimuth area (mean)", "azimuth area (median)"))
+```
