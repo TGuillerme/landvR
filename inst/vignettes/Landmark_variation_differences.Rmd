@@ -1,0 +1,147 @@
+---
+title: "Landmark difference measurements"
+author: "Thomas Guillerme"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    fig_width: 12
+    fig_height: 6
+---
+
+This vignette illustrates the differences in measuring landmark variation.
+
+## Requirements and data
+
+### The packages
+
+This test will be using the `landvR` package from github and will require `devtools`, `geomorph` and `dispRity` from the CRAN.
+All these packages can be loaded easily as follows
+
+```{r, message = FALSE, warning = FALSE}
+## Loading the libraries (and installing if necessary)
+if(!require(devtools)) install.packages("devtools")
+if(!require(geomorph)) install.packages("geomorph")
+if(!require(landvR)) install_github("TGuillerme/landvR")
+
+## Setting a random seed for the repeatability of this tutorial
+set.seed(42)
+```
+
+### The data
+
+This whole method is based on Procrustes superimpositions that can be easily done through the `geomorph` package (see the `geomorph` manual and especially the function `gpagen` for more details).
+For this example, we will be using the `plethodon` dataset from the `geomorph` `R` package.
+
+```{r}
+## Loading the dataset
+data(plethodon)
+
+## Generating a Procrustes superimposition
+procrustes <- gpagen(plethodon$land, print.progress = FALSE)
+```
+
+This results in a dataset of 40 Procrustes superimposition of 12 landmarks each.
+
+# Landmark variation
+
+First lets get the two most different specimens for simplifying the comparisons:
+
+```{r}
+## Getting the two most different specimens
+extreme_spec <- variation.range(procrustes, return.ID = TRUE)$min.max
+
+## Separating the specimens
+specimen_1 <- procrustes$coords[, , extreme_spec[1]]
+specimen_2 <- procrustes$coords[, , extreme_spec[2]]
+```
+
+We can then measure the distances between both specimens using spherical or vector coordinates:
+
+
+## Spherical coordinates
+
+```{r}
+## Measuring the spherical coordinates differences from the mean
+spherical_diff <- coordinates.difference(coordinates = specimen_1, reference = specimen_2,
+                                        type = "spherical", angle = "degree")[[1]]
+```
+
+This results in a list of coordinates for each specimen.
+For example, to look at the differences between the first specimen and the consensus in terms of spherical coordinates, one can call:
+
+```{r}
+## The differences between the two selected specimens
+spherical_diff
+```
+
+> Note that the angles are expressed in degrees here (column `$azimuth`) but they can be measured in radian using the `angle` option in `coordinates.difference`.
+
+The radius of spherical coordinates differences for all the specimens to the mean specimen is equivalent to listing all the vectors between each mean landmark position and each specimens' one.
+In small datasets like here, this can be easily visualised using the following:
+
+```{r, fig.height = 8, fig.width = 8}
+## Graphical parameters
+par(mar = c(0, 0, 0, 0))
+
+# ## Plotting the consensus and the 
+# plot_range <- range(as.vector(specimen_1, specimen_2))
+# plot(NULL, ylim = plot_range, xlim = plot_range)
+# points(specimen_1, pch = 19, col = "blue")
+# points(specimen_2, pch = 19, col = "orange")
+
+## The variation range between the two specimens
+procrustes.var.plot(specimen_1, specimen_2, col = list("blue", "white"))
+points(specimen_2, col = "orange", pch = 19)
+
+## Getting the spherical coordinates representation for the landmark 7
+landmark <- 3
+
+## Spherical coordinate system
+circle_center <- specimen_1[landmark,]
+circle_radius <- spherical_diff[landmark, "radius"]
+azimuth_angle <- spherical_diff[landmark, "azimuth"]
+plotrix::draw.circle(x = circle_center[1], y = circle_center[2], radius = circle_radius)
+
+## radius
+arrows(x0 = specimen_1[landmark, 1], y0 = specimen_1[landmark, 2],
+       x1 = specimen_2[landmark, 1], y1 = specimen_2[landmark, 2],
+       length = 0, angle = 0, code = 2, lwd = 1.5)
+
+## azimuth
+arrows(x0 = specimen_2[landmark, 1], y0 = specimen_1[landmark, 2],
+       x1 = specimen_1[landmark, 1] + abs(specimen_2[landmark, 1] - specimen_1[landmark, 1]),
+       y1 = specimen_1[landmark, 2],
+       length = 0, angle = 0, code = 2, lwd = 1, lty = 3)
+    
+## angle
+plotrix::draw.arc(specimen_1[landmark, 1], specimen_1[landmark, 2], 0.04, deg1 = 180, deg2 = azimuth_angle + 180)
+
+## Explanatory arrows
+
+## The circle:
+circle_text_pos <- c(0.1, 0.2)
+arrows(x1 = 0, y1 = 0.075, x0 = circle_text_pos[1], y0 = circle_text_pos[2], length = 0.1)
+text(x = circle_text_pos[1], y = circle_text_pos[2] + 0.01, "Polar coordinates system")
+
+## The radius
+rad_pos <- -0.2
+arrows(x1 = mean(c(specimen_1[landmark, 1], specimen_2[landmark, 1])),
+       y1 = mean(c(specimen_1[landmark, 2], specimen_2[landmark, 2])) - 0.01,
+       x0 = 0, y0 = rad_pos, length = 0.1)
+text(0, rad_pos-0.02, "radius")
+
+## The azimuth
+rad_pos <- -0.2
+arrows(x1 = specimen_1[landmark, 1] + abs(specimen_2[landmark, 1] - specimen_1[landmark, 1]),
+       y1 = specimen_1[landmark, 2],
+       x0 = 0.4, y0 = rad_pos, length = 0.1)
+text(0.4, rad_pos-0.02, "azimuth")
+
+
+## The azimuth
+rad_pos <- -0.2
+arrows(x1 = specimen_2[landmark, 1], y1 = specimen_1[landmark, 2],
+       x0 = rad_pos, y0 = 0.03, length = 0.1)
+text(rad_pos, 0.03, "angle")
+
+```
