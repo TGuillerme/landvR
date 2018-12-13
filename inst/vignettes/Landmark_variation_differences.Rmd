@@ -1,5 +1,5 @@
 ---
-title: "Landmark difference measurements"
+title: "Landmark displacement measurements"
 author: "Thomas Guillerme"
 date: "`r Sys.Date()`"
 output:
@@ -8,7 +8,7 @@ output:
     fig_height: 6
 ---
 
-This vignette illustrates the differences in measuring landmark variation.
+This vignette illustrates the differences in measuring landmark displacement (or variation).
 
 ## Requirements and data
 
@@ -42,7 +42,7 @@ procrustes <- gpagen(plethodon$land, print.progress = FALSE)
 
 This results in a dataset of 40 Procrustes superimposition of 12 landmarks each.
 
-# Landmark variation
+# Landmark displacement
 
 First lets get the two most different specimens for simplifying the comparisons:
 
@@ -55,13 +55,28 @@ specimen_1 <- procrustes$coords[, , extreme_spec[1]]
 specimen_2 <- procrustes$coords[, , extreme_spec[2]]
 ```
 
-We can then measure the distances between both specimens using spherical or vector coordinates:
+We can then measure the landmark displacements between a focal specimen (specimen 1, in blue below) and a reference one (specimen 2, in orange).
+Typically the focal one can be all the observed specimens and the reference one could be the mean or median landmark configuration.
 
+These landmark displacements can be measured using two coordinates systems: the spherical or the vector one and is always measured between $F_{n}$ and $R_{n}$, respectively the $n^{th}$ landmark of the focal specimen and the reference.
+$F_{n}$ and $R_{n}$ are defined by two or three coordinates _x, y, z_ depending on the number of dimensions in the system.
 
 ## Spherical coordinates
 
+The spherical coordinates measure the landmark's displacement in spherical coordinates systems for each landmark individually.
+In other words, the values for each landmark displacement is discrete in space (i.e. independent from other landmarks).
+
+The [spherical coordinate system](https://en.wikipedia.org/wiki/Spherical_coordinate_system) is a 3D (or 2D) referential centred on a point of origin (here the $n^{th}$ landmark of the focal specimen).
+The system is defined by two or three variables (for respectively 2D and 3D systems):
+
+ * $\rho$, the Euclidean distance between $F_{n}$ and $R_{n}$.
+ * $\phi$, the azimuth angle formed by the projection of $R_{n}$ on the equatorial plan ($f_{(x)}=0$).
+ * $\theta$ (for 3D only), the polar angle formed by the projection $R_{n}$ on the polar plan ($f{(y)=0}$)
+
+In `landvR` they are measured using basic algebra and trigonometry through the following function:
+
 ```{r}
-## Measuring the spherical coordinates differences from the mean
+## Measuring the spherical coordinates between specimen 1 (focal) and 2 (reference)
 spherical_diff <- coordinates.difference(coordinates = specimen_1, reference = specimen_2,
                                         type = "spherical", angle = "degree")[[1]]
 ```
@@ -74,26 +89,22 @@ For example, to look at the differences between the first specimen and the conse
 spherical_diff
 ```
 
-> Note that the angles are expressed in degrees here (column `$azimuth`) but they can be measured in radian using the `angle` option in `coordinates.difference`.
+In this case, for each landmark, the longer the radii $\rho$, the more it is displaced and the bigger the azimuth $\phi$, the more away from the equatorial plan.
 
-The radius of spherical coordinates differences for all the specimens to the mean specimen is equivalent to listing all the vectors between each mean landmark position and each specimens' one.
-In small datasets like here, this can be easily visualised using the following:
+Here is a graphical representation of the system for a single landmark (3) with a radius of `r spherical_diff[3, "radius"]` and an angle of `r spherical_diff[3, "azimuth"]` degrees.
 
-```{r, fig.height = 8, fig.width = 8}
+
+```{r, fig.height = 8, fig.width = 8, echo = FALSE}
 ## Graphical parameters
 par(mar = c(0, 0, 0, 0))
 
-# ## Plotting the consensus and the 
-# plot_range <- range(as.vector(specimen_1, specimen_2))
-# plot(NULL, ylim = plot_range, xlim = plot_range)
-# points(specimen_1, pch = 19, col = "blue")
-# points(specimen_2, pch = 19, col = "orange")
-
 ## The variation range between the two specimens
 procrustes.var.plot(specimen_1, specimen_2, col = list("blue", "white"))
+legend(0.4, 0.4, legend = c("Focal specimen", "Reference spec."), pch = 19, col = c("blue", "orange"),
+      bty = "n")
 points(specimen_2, col = "orange", pch = 19)
 
-## Getting the spherical coordinates representation for the landmark 7
+## Getting the spherical coordinates representation for the landmark 3
 landmark <- 3
 
 ## Spherical coordinate system
@@ -138,10 +149,148 @@ arrows(x1 = specimen_1[landmark, 1] + abs(specimen_2[landmark, 1] - specimen_1[l
 text(0.4, rad_pos-0.02, "azimuth")
 
 
-## The azimuth
+## The angle
 rad_pos <- -0.2
-arrows(x1 = specimen_2[landmark, 1], y1 = specimen_1[landmark, 2],
-       x0 = rad_pos, y0 = 0.03, length = 0.1)
-text(rad_pos, 0.03, "angle")
+arrows(x1 = specimen_2[landmark, 1]+0.02, y1 = specimen_1[landmark, 2]-0.01,
+       x0 = rad_pos + 0.05, y0 = 0.03, length = 0.1)
+text(rad_pos, 0.03, "angle from\nazimuth")
 
 ```
+
+This system has the advantage of directly measuring the landmark displacement in _any_ direction and to be independent from other landmarks within the same specimen.
+However, the azimuth and polar angle are often hard to interpret in isolation since they are relative to the equatorial and polar plan of the specimens (which can be arbitrary).
+
+
+## Vector coordinates
+
+The vector coordinates system is a bit different than the spherical one in that it is based on the landmark displacements relative to the centroid of the reference specimen.
+The centroid point of the reference, $C$, is the mean of all the _x, y, z_ coordinates for all the landmarks of the reference specmin.
+This coordinate system is based on the vectors between the centroid $C$ and $F_{n}$ or $R_{n}$.
+These two vectors are called $\bf{v}_{Fn}$ and $\bf{v}_{Rn}$ respectively.
+The system is defined by two variables (regardless of the number of dimensions):
+
+ * the displacement length which is the difference between both vectors ($||\bf{v}_{Rn}|| - ||\bf{v}_{Fn}||$)
+ * the angle between the two vectors $\bf{v}_{Fn}$ and $\bf{v}_{Rn}$
+
+In `landvR` they are measured using basic vector operations through the following function:
+
+```{r}
+## Measuring the spherical coordinates between specimen 1 (focal) and 2 (reference)
+vector_diff <- coordinates.difference(coordinates = specimen_1, reference = specimen_2,
+                                      type = "vector", angle = "degree",
+                                      absolute.distance = FALSE)[[1]]
+```
+
+Note that we've asked the distances to be not absolute, toggling this option allows the distances to be calculated as $\sqrt((\bf{v}_{Fn} - \bf{v}_{Rn})^2)$ (`TRUE`) or \bf{v}_{Fn} - \bf{v}_{Rn} (`FALSE`).
+With absolute distances, it measures only the _magnitude_ of the displacement whereas without absolute distances the results also indicate the _direction_ of the displacement: a positive value means the landmark is displaced "outside" of the reference and a negative value means it is displaced "inside".
+
+
+```{r}
+## The differences between the two selected specimens
+vector_diff
+```
+
+In this case, for each landmark, the longer the difference in length (in absolute value), the more it is displaced and the bigger the angle, the more it is offset.
+In terms of biology, if all lengths are positive and all angles are close to 0, the specimen is simply generally bigger (with no major changes in shape).
+On the other hand, if the lengths are close to 0 but the angles are high, the specimen is not bigger but still "deformed",
+
+Here is a graphical representation of the system for a single landmark (7) with a difference of `r vector_diff[7, "length"]` and an angle of `r vector_diff[7, "angle"]` degrees:
+
+```{r, fig.height = 8, fig.width = 8, echo = FALSE}
+## Graphical parameters
+par(mar = c(0, 0, 0, 0))
+
+## The variation range between the two specimens
+procrustes.var.plot(specimen_1, specimen_2, col = list("blue", "white"))
+legend(0.4, 0.4, legend = c("Focal specimen", "Reference spec."), pch = 19, col = c("blue", "orange"),
+      bty = "n")
+# legend(0.4, 0.4, legend = c("Focal specimen", "Reference spec.", "Ref. centroid"),
+#    pch = c(19, 19, 13), col = c("blue", "orange", "black"), bty = "n")
+points(specimen_2, col = "orange", pch = 19)
+
+## Add the centroid
+ref_centroid <- apply(specimen_2, 2, mean)
+points(ref_centroid[1], ref_centroid[2], pch = 13, cex = 2)
+
+## Getting the spherical coordinates representation for the landmark 7
+landmark <- 7
+
+## Get the length and angle
+vector_length <- vector_diff[landmark, "length"]
+vector_angle <- vector_diff[landmark, "angle"]
+## Get the angle
+
+## Ref dist
+arrows(x0 = ref_centroid[1], y0 = ref_centroid[2],
+       x1 = specimen_2[landmark, 1], y1 = specimen_2[landmark, 2],
+       length = 0, lty = 3)
+
+## Focal dist
+arrows(x0 = ref_centroid[1], y0 = ref_centroid[2],
+       x1 = specimen_1[landmark, 1], y1 = specimen_1[landmark, 2],
+       length = 0, lty = 3)
+
+## Angle
+fun.angle <- function(one_row, axis, dimension) {
+    return(
+        acos( ( sqrt((one_row[-c(1:dimension)][axis] - one_row[1:dimension][axis])^2) ) / sqrt(sum((one_row[-c(1:dimension)]-one_row[1:dimension])^2)) )
+        )
+}
+angle_shift <- fun.angle(c(c(0,0), specimen_2[landmark, ]), 2, 2)*180/pi+90
+plotrix::draw.arc(ref_centroid[1], ref_centroid[2], 0.2, deg1 = angle_shift, deg2 = vector_angle + angle_shift)
+
+## Distance projection
+projection <- dist(rbind(ref_centroid, specimen_2[landmark,]))[[1]]
+plotrix::draw.arc(ref_centroid[1], ref_centroid[2], projection, deg1 = angle_shift, deg2 = vector_angle + angle_shift, lty = 3)
+
+## Get the projected x/y coords
+x_proj = projection * cos(vector_angle+angle_shift-90)
+y_proj = -projection * sin(vector_angle+angle_shift-90) # Should be around 0.0265!
+
+## The measured distance
+arrows(x0 = x_proj, y0 = 0.0265,
+       x1 = specimen_1[landmark, 1], y1 = specimen_1[landmark, 2],
+       length = 0, lty = 1, lwd = 1)
+
+## Explanatory arrows
+
+## The centroid:
+text_pos <- c(0.2, -0.2)
+arrows(x1 = ref_centroid[1]+0.02, y1 = ref_centroid[2]-0.02,
+       x0 = text_pos[1], y0 = text_pos[2], length = 0.1)
+text(x = text_pos[1], y = text_pos[2]-0.015, "Reference's centroid")
+
+## The angle
+text_pos <- c(-0.1, -0.2)
+arrows(x1 = mean(c(specimen_1[landmark, 1], ref_centroid[1])) - 0.04,
+       y1 = mean(c(specimen_1[landmark, 2], ref_centroid[2])),
+       x0 = text_pos[1], y0 = text_pos[2], length = 0.1)
+text(x = text_pos[1], y = text_pos[2]-0.015, "angle")
+
+## The length
+text_pos <- c(-0.3, -0.2)
+arrows(x1 = specimen_1[landmark, 1] + 0.015,
+       y1 = specimen_1[landmark, 2] - 0.005,
+       x0 = text_pos[1], y0 = text_pos[2], length = 0.1)
+text(x = text_pos[1], y = text_pos[2]-0.03, "length\nv(ref) - v(foc)")
+
+
+## The reference vector
+text_pos <- c(-0.2, 0.3)
+arrows(x1 = specimen_2[landmark, 1] + 0.03,
+       y1 = specimen_2[landmark, 2] - 0.005,
+       x0 = text_pos[1], y0 = text_pos[2], length = 0.1)
+text(x = text_pos[1], y = text_pos[2]+0.02, "reference vector (v(ref))")
+
+
+## The length
+text_pos <- c(0.2, 0.2)
+arrows(x1 = ref_centroid[1] - 0.1,
+       y1 = ref_centroid[2] + 0.015,
+       x0 = text_pos[1], y0 = text_pos[2]-0.02, length = 0.1)
+text(x = text_pos[1], y = text_pos[2], "focal vector (v(foc))")
+
+```
+
+This coordinate system has the advantage to be more interpretable biologically (i.e. the length and angle will give a clear overview of how the landmark has moved relative to the reference) but the measurements are always relative to the reference and dependent on the other landmarks (used to calculate the centroid point).
+
