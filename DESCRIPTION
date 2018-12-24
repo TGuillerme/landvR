@@ -8,6 +8,7 @@ Date: 2018-11-29
 Description: A package for measuring the variation of 2D and 3D landmarks variation in the Procrustes space based on the geomorph package data format.
 Depends:
     R (>= 3.0.0),
+    magick,
     geomorph
 Imports:
 	ade4,
