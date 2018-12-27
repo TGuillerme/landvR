@@ -4,6 +4,7 @@ warnings_are_errors: false
 before_install:
   - sudo apt-get update
   - printf "\n" | pecl install imagick
+  - pecl install libgit2
 
 branches:
   only:
