@@ -4,7 +4,9 @@ warnings_are_errors: false
 before_install:
   - sudo apt-get update
   - printf "\n" | pecl install imagick
-  - pecl install libgit2
+  - export LD_FLAGS=-L$HOME/opt/lib
+  - export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib:$HOME/opt/lib
+  - export CPATH=$CPATH:$HOME/opt/include
 
 branches:
   only:
