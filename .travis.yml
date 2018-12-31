@@ -1,4 +1,5 @@
 language: r
+    r: - devel
 warnings_are_errors: false
 
 before_install:
