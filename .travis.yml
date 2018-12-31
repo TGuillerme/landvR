@@ -1,5 +1,5 @@
 language: r
-    r: - devel
+r_binary_packages: - ncdf4
 warnings_are_errors: false
 
 before_install:
