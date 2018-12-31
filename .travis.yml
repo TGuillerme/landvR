@@ -4,9 +4,7 @@ sudo: required
 warnings_are_errors: false
 
 r:
-  - oldrel
   - release
-  - devel
 
 # blacklist
 # branches:
