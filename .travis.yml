@@ -23,8 +23,6 @@ r_binary_packages:
   - ade4
   - dispRity
   - geometry
-  - graphics
-  - grDevices
   - rgl
   - zoo
   - covr
