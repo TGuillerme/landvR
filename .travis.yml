@@ -1,19 +1,42 @@
 language: r
-r_binary_packages: - ncdf4
+cache: packages
+sudo: required
 warnings_are_errors: false
 
-before_install:
-  - sudo apt-get update
-  - printf "\n" | pecl install imagick
+r:
+  - oldrel
+  - release
+  - devel
 
+# blacklist
+# branches:
+#   except:
+#     - master
+
+# whitelist
 branches:
   only:
     - master
-  except:
+    - release
 
-# Code coverage
-r_packages:
+r_binary_packages:
+  - ade4
+  - dispRity
+  - geometry
+  - graphics
+  - grDevices
+  - rgl
+  - zoo
   - covr
+
+# addons:
+#   apt:
+#     packages:
+#       - libxml2-dev
+      
+branches:
+  only:
+    - master
 
 after_success:
   - Rscript -e 'library(covr); codecov(token = "0fe8593a-c2ae-465a-a9f9-c8ac244116e3")'
