@@ -18,6 +18,7 @@ branches:
     - release
 
 r_binary_packages:
+  - geomorph
   - ade4
   - dispRity
   - geometry
