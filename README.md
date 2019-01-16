@@ -25,7 +25,7 @@ Check out the [paper](https://besjournals.onlinelibrary.wiley.com/doi/abs/10.111
 ```r
 if(!require(devtools)) install.packages("devtools")
 library(devtools)
-install_github("TGuillerme/landvR", ref = "release")
+install_github("TGuillerme/landvR")
 library(landvR)
 ```
 
