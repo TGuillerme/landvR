@@ -34,11 +34,12 @@ library(landvR)
 A detailed vignette for performing the landmark Procrustes coordinates variation test is available [online](https://cdn.rawgit.com/TGuillerme/landvR/8a6a6bd5/inst/vignettes/Landmark_partition_test.html) or as in [Rmd](https://github.com/TGuillerme/landvR/blob/master/inst/vignettes/Landmark_partition_test.Rmd).
 
 ## Latest patch notes
-* 2018/07/23 - v0.1
+* 2018/11/29 - v0.2
 
-  * First release!
+  * `linear.dist` function to measure linear distances between pairs of landmarks.
+  * `array.to` utility function for converting `gpagen` arrays to lists or matrices.
 
-<!-- Previous patch notes and notes for the *next version* can be seen [here](https://github.com/TGuillerme/dispRity/blob/master/NEWS.md). -->
+Previous patch notes and notes for the *next version* can be seen [here](https://github.com/TGuillerme/landvR/blob/master/NEWS.md).
 
 Authors and contributors
 -------
