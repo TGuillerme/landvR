@@ -214,9 +214,8 @@ variation.range <- function(procrustes, type = "spherical", angle = "degree", wh
 
         ## Get the selector function
         if(do_CI) {
-            warning("The CI implementation for ordinated data might not give the exact results.", call. = FALSE)
-            fun_max <- function(x, CI) return(max(x[which(x <= quantile(x, probs = CI/100))]))
-            fun_min <- function(x, CI) return(min(x[which(x >= quantile(x, probs = 1-CI/100))]))
+            fun_max <- function(x, CI) return(max(x[which(x <= quantile(x, probs = CI))]))
+            fun_min <- function(x, CI) return(min(x[which(x >= quantile(x, probs = CI))]))
         } else {
             CI <- NULL
             fun_max <- function(x, CI) return(max(x))
@@ -224,11 +223,12 @@ variation.range <- function(procrustes, type = "spherical", angle = "degree", wh
         }
 
         ## Applying the method the an ordination
-        max_coordinates <- get.pc.min.max(axis = axis, what = fun_max, PCA = ordination, GPA = procrustes, CI = CI)
+        max_coordinates <- get.pc.min.max(axis = axis, what = fun_max, PCA = ordination, GPA = procrustes, CI = quantile_max)
         dimensions <- dim(max_coordinates)
         max_coordinates <- matrix(max_coordinates, dimensions[1], dimensions[2])
-        min_coordinates <- get.pc.min.max(axis = axis, what = fun_min, PCA = ordination, GPA = procrustes, CI = CI)
+        min_coordinates <- get.pc.min.max(axis = axis, what = fun_min, PCA = ordination, GPA = procrustes, CI = quantile_min)
         min_coordinates <- matrix(min_coordinates, dimensions[1], dimensions[2])
+
 
         ## Get the variation range
         variation_range <- coordinates.difference(min_coordinates, max_coordinates, type = type, angle = angle)[[1]]
@@ -237,8 +237,8 @@ variation.range <- function(procrustes, type = "spherical", angle = "degree", wh
         if(length(axis) != 1) {
             axis <- axis[1]
         }
-        max_specimenID <- which(ordination$x[,axis] == fun_max(ordination$x[,axis], CI))
-        min_specimenID <- which(ordination$x[,axis] == fun_min(ordination$x[,axis], CI))
+        max_specimenID <- which(ordination$x[,axis] == fun_max(ordination$x[,axis], quantile_max))
+        min_specimenID <- which(ordination$x[,axis] == fun_min(ordination$x[,axis], quantile_min))
     }
     
     if(!do_ordinate && return.ID){   

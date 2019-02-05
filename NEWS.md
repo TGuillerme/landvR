@@ -21,13 +21,17 @@ dispRity 0.2.0 (2016-04-01)
 
   * Blabla
  -->
-landvR v0.2 (2018-11-29)
+landvR v0.2 (2019-02-05)
 =========================
 
 ### NEW FEATURES
 
   * `linear.dist` function to measure linear distances between pairs of landmarks.
   * `array.to` utility function for converting `gpagen` arrays to lists or matrices.
+
+### BUG FIXES
+
+  * correct CI selection in `variation.range` when using `ordination = TRUE`.
 
 
 landvR v0.1 (2018-07-23)

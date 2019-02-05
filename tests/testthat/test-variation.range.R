@@ -43,7 +43,7 @@ test_that("variation.range sanitizing works", {
     expect_equal(dim(test100ID[[1]]), c(46, 3))
 
     ## Ordination (auto)
-    expect_warning(test095 <- variation.range(proc_super_2D, ordination = TRUE, CI = 0.95))
+    test095 <- variation.range(proc_super_2D, ordination = TRUE, CI = 0.95)
     test100 <- variation.range(proc_super_2D, ordination = TRUE)
     expect_warning(test095ID <- variation.range(proc_super_2D, ordination = TRUE, CI = 0.95, axis = 1, return.ID = TRUE))
     expect_warning(test100ID <- variation.range(proc_super_2D, ordination = TRUE, axis = c(1,2), return.ID = TRUE))
