@@ -12,10 +12,10 @@ Development (master):
 [![Build Status](https://travis-ci.org/TGuillerme/landvR.svg?branch=master)](https://travis-ci.org/TGuillerme/landvR)
 [![codecov](https://codecov.io/gh/TGuillerme/landvR/branch/master/graph/badge.svg)](https://codecov.io/gh/TGuillerme/landvR)
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
-[![develVersion](https://img.shields.io/badge/devel%20version-0.1-green.svg?style=flat)](https://github.com/TGuillerme/landvR)
-<!-- [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.846254.svg)](https://doi.org/10.5281/zenodo.846254)
- -->
-### **`landvR`** is a `R` utility package for measuring landmark variation from based on [`geomorph`](https://github.com/geomorphR/geomorph) data.
+[![develVersion](https://img.shields.io/badge/devel%20version-0.2-green.svg?style=flat)](https://github.com/TGuillerme/landvR)
+[![DOI](https://zenodo.org/badge/141964125.svg)](https://zenodo.org/badge/latestdoi/141964125)
+
+### **`landvR`** is a `R` utility package for measuring landmark variation based on [`geomorph`](https://github.com/geomorphR/geomorph) data.
 
 <!-- <a href="https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13022"><img src="http://tguillerme.github.io/images/OA.png" height="15" widht="15"/></a> 
 Check out the [paper](https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13022) associated with this package.
@@ -47,10 +47,7 @@ Authors and contributors
 * [Thomas Guillerme](http://tguillerme.github.io)
 * [Vera Weisbecker](http://weisbeckerlab.com.au)
 
-<!-- Citation
 -------
 If you are using this package, please cite the paper:
 
-* Guillerme, T. (**2018**). dispRity: a modular R package for measuring disparity. Methods in Ecology and Evolution. [doi:10.1111/2041-210X.13022](https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13022)
-
- -->
+* Guillerme, T. and Weisbecker V. (**2019**). landvR: Tools for measuring landmark position variation. Zenodo. [doi:10.5281/zenodo.2620785](https://zenodo.org/record/2620785#.XKLvj6ZS8W8)
