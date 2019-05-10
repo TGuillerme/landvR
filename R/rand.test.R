@@ -163,7 +163,7 @@ rand.test <- function(distribution, subset, test, replicates = 100, resample = T
     }
 
     
-    ## Select the sub-population size
+    ## Select the sub-population size
     pop_size <- ifelse(is_rarefied, rarefaction, length(subset))
 
     ## Observed draw

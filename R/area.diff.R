@@ -76,7 +76,7 @@ area.diff <- function(x, y, rarefy, cent.tend = mean, sort = TRUE) {
         y_y <- y
     }
 
-    ## Getting the vectors lengths
+    ## Getting the vectors lengths
     length_x <- length(x)
     length_y <- length(y)
 
@@ -86,7 +86,7 @@ area.diff <- function(x, y, rarefy, cent.tend = mean, sort = TRUE) {
         x_axis <- 1:length_x
     } else {
         do_rarefy <- TRUE
-        ## Samples have different sizes
+        ## Samples have different sizes
         if(length_x > length_y) {
             x_rare <- TRUE
 

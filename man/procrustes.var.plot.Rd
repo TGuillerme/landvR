@@ -5,8 +5,8 @@
 \title{Plot Procrustes variation}
 \usage{
 procrustes.var.plot(M1, M2, col = list("grey", "black"), col.val,
-  magnitude = 1, labels = FALSE, axes = FALSE, pt.size = 1, gridPar,
-  ...)
+  magnitude = 1, labels = FALSE, axes = FALSE, pt.size = 1,
+  gridPar, ...)
 }
 \arguments{
 \item{M1}{Matrix of landmark coordinates for the first (reference) specimen}

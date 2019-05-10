@@ -86,7 +86,7 @@ select.procrustes <- function(procrustes, selector = mean, factors){#, specimen 
             has_names <- FALSE
         }
 
-        ## Check the factors dimensions and names
+        ## Check the factors dimensions and names
         if(all(class_factors == "character")) {
             if(!has_names) {
                 stop(paste0("There are no names in ", as.expression(match_call$procrustes), " matching with the factors argument."))

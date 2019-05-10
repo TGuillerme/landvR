@@ -91,7 +91,7 @@ coordinates.difference <- function(coordinates, reference, type = "cartesian", a
     if(add_names) {
         coordi_names <- names(coordinates)
     } else {
-        ## Check if the names are not in an array dimnames attributes
+        ## Check if the names are not in an array dimnames attributes
         if(!is.null(attributes(coordinates)$dimnames[[3]])) {
             add_names <- TRUE
             coordi_names <- attributes(coordinates)$dimnames[[3]]
@@ -180,7 +180,7 @@ coordinates.difference <- function(coordinates, reference, type = "cartesian", a
         ## Dot product of the vectors
         dot_prod <- geometry::dot(reference, observed)
 
-        ## Get the angle
+        ## Get the angle
         angles <- acos(dot_prod / (ref_length * obs_length))
 
         if(angle == "degree") {
@@ -211,7 +211,7 @@ coordinates.difference <- function(coordinates, reference, type = "cartesian", a
             polar <- lapply(coordinates, get.angle, axis = 3, dimensions[2], degree = degree)
         }
 
-        ## Combine the coordinates
+        ## Combine the coordinates
         coordinates <- mapply(cbind, radius, azimuth, SIMPLIFY = FALSE)
 
         if(dimensions[2] == 2) {
@@ -244,7 +244,7 @@ coordinates.difference <- function(coordinates, reference, type = "cartesian", a
 
 # stop("DEBUG in coordinates difference")
 
-# ## Get the ranges
+# ## Get the ranges
 # range_1 <- apply(proc_super$coords[,, 33], 2, range)
 # range_2 <- apply(proc_super$coords[,, 14], 2, range)
 # xlim <- ylim <- range(as.vector(range_1), as.vector(range_2))

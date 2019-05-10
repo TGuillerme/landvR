@@ -147,7 +147,7 @@
 #     ## Calculate the p-value
 #     p_value <- get.p.value(bs_t_statistic, t_statistic, replicates)
 
-#     ## Get the test results
+#     ## Get the test results
 #     if(!rarefaction) {
 #         test_results <- c("Residuals" = (t_statistic - mean(bs_t_statistic)) / stats::sd(bs_t_statistic), "Bootstrap mean" = mean(bs_t_statistic), "Bootstrap variance" = stats::var(bs_t_statistic))
 #     } else {

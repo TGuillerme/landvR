@@ -122,7 +122,7 @@ procrustes.var.plot <- function(M1, M2, col = list("grey", "black"), col.val, ma
   ## Checking the arguments
   col_fun_check <- rep(FALSE, length(col))
   for(sub in 1:length(col)) {
-    ## Get the class
+    ## Get the class
     class_col <- class(col[[sub]])
     ## Check the argument
     if(class_col != "function") {
@@ -138,7 +138,7 @@ procrustes.var.plot <- function(M1, M2, col = list("grey", "black"), col.val, ma
         stop("col argument must be a single value, vector (of the same number of rows as M1) or function or a list of two of any of the former.", .call = FALSE)
       }
     } else {
-      ## Colour is a function
+      ## Colour is a function
       col_fun_check[sub] <- TRUE
     }
   }
@@ -171,7 +171,7 @@ procrustes.var.plot <- function(M1, M2, col = list("grey", "black"), col.val, ma
   check.class(magnitude, c("integer", "numeric"))
   check.length(magnitude, 1, " must be a single numeric value.")
   if(magnitude != 1) {
-    ## Scale M2
+    ## Scale M2
     M2 <- M2 + (M2 - M1) * magnitude
   }
 
@@ -289,7 +289,7 @@ procrustes.var.plot <- function(M1, M2, col = list("grey", "black"), col.val, ma
       rgl::text3d(M1, texts = paste(1:dim(M1)[1]), adj = (grid_par$txt.adj + grid_par$pt.size), pos = (grid_par$txt.pos + grid_par$pt.size), cex = grid_par$txt.cex, col = grid_par$txt.col)
     } 
 
-    ## Function for adding the segments
+    ## Function for adding the segments
     add.segment <- function(i, M1, M2, lwd = 2, col) {
       rgl::segments3d(rbind(M1[i, ], M2[i, ]), lwd = lwd, col = col[i])
     }

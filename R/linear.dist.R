@@ -75,7 +75,7 @@ linear.dist <- function(landmarks, measurements, dist = "euclidean") {
             stop("measurements must be a pair of landmarks (or multiple pairs).")
         }
     }
-    ## Check if all the measurements are below the number of landmarks
+    ## Check if all the measurements are below the number of landmarks
     if(any(unlist(measurements) > n_landmarks)) {
         stop(paste0("landmark IDs in measurements argument cannot be greater than the number of landmarks (", n_landmarks, ")."))
     }
@@ -105,7 +105,7 @@ linear.dist <- function(landmarks, measurements, dist = "euclidean") {
         names(distances) <- names(measurements)
         return(distances)
     } else {
-        ## Make a distance matrix
+        ## Make a distance matrix
         distance_matrix <- do.call(cbind, all_distances)
         rownames(distance_matrix) <- land_names
         colnames(distance_matrix) <- names(measurements)
