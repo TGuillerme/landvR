@@ -15,6 +15,7 @@ tmp <- sapply(1:dim(coord)[3], function(x, coord) return(list(coord[,,x])), coor
 tmp[[40]] <- matrix(rnorm(25), 5, 5)
 names(coord) <- seq(1:40)
 attributes(proc_super_2D$coord)$dimnames[[3]] <- seq(1:40)
+
 #Test
 test_that("coordinates.difference sanitizing works", {
 
@@ -114,4 +115,14 @@ test_that("vector works", {
     expect_lt(vector_diff_noabs[[40]][1,1], 0)
     expect_gt(vector_diff[[40]][1,1], 0)
 
+})
+test_that("rounding works", {
+    expect_error(coordinates.difference(proc_super_3D$coords, proc_super_3D$consensus, type = "spherical", rounding = "1"))
+    test <- coordinates.difference(coordinates = proc_super_3D$coords, reference = proc_super_3D$consensus, type = "spherical", rounding = 1)
+    expect_is(test, "list")
+    expect_false(any(is.nan(test[[1]])))
+    expect_true(any(test[[1]][,2] == 0))
+    expect_true(any(test[[1]] == 0))
+    test <- coordinates.difference(coordinates = proc_super_3D$coords, reference = proc_super_3D$consensus, type = "spherical", rounding = 0)
+    expect_true(all(test[[1]] == 0))
 })

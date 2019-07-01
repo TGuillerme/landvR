@@ -21,6 +21,14 @@ dispRity 0.2.0 (2016-04-01)
 
   * Blabla
  -->
+
+landvR v0.3 (2019-01-07)
+=========================
+
+## MINOR IMPROVEMENTS
+
+ * `coordinates.difference` now has a `rounding` tolerance argument for rounding values (suggest by [Ellen Coombs](https://twitter.com/EllenCoombs)). Also, the function can not produce infinite angles anymore (`NaN` are replaced by `0`).
+
 landvR v0.2 (2019-02-05)
 =========================
 

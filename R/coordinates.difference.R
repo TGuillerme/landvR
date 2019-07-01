@@ -7,6 +7,7 @@
 #' @param type the type of coordinates to output: can be \code{"cartesian"} (x0, y0, x1, y1,... format), \code{"spherical"} (radius, polar, azimuth) or \code{"vector"} (length, angle(s)).
 #' @param angle optional, whether display angles in radian (\code{"radian"}) or in degrees (\code{"degree"} - default).
 #' @param absolute.distance \code{logical}, when using \code{"vector"}, whether to use the absolute distance (from the centroid) or the relative one (from the reference landmark). See details.
+#' @param rounding optional, a tolerance value for rounding pairs of landmarks (passed to \code{\link[base]{round}}), if \code{NULL} (default), no rounding is applied and exact differences are calculated.
 #' 
 #' @details
 #' When using \code{type = "vector"} with \code{absolute.distance = TRUE}, the distance between two landmarks A and A' is calculated as d(0,A') - d(0,A) where 0 is the centroid of the shape to analysis.
@@ -45,7 +46,7 @@
 #' @export
 #' @importFrom geometry dot
 
-coordinates.difference <- function(coordinates, reference, type = "cartesian", angle = "degree", absolute.distance = TRUE) {
+coordinates.difference <- function(coordinates, reference, type = "cartesian", angle = "degree", absolute.distance = TRUE, rounding = NULL) {
 
     ## Sanitizing
 
@@ -110,6 +111,15 @@ coordinates.difference <- function(coordinates, reference, type = "cartesian", a
     ## absolute distance
     check.class(absolute.distance, "logical")
 
+    ## Tolerance
+    if(!is.null(rounding)) {
+        silent <- check.class(rounding, c("numeric", "integer"))
+        rounding <- ifelse(silent == "numeric", round(rounding), rounding)
+        ## Rounding the coordinates and the reference
+        reference <- round(reference, digits = rounding)
+        coordinates <- lapply(coordinates, round, digits = rounding)
+    }
+
     ## Getting the vector coordinates
     get.coord <- function(one_coordinate, reference, dimension) {
         ## Get the coordinates
@@ -139,16 +149,17 @@ coordinates.difference <- function(coordinates, reference, type = "cartesian", a
 
         ## Absolute version
         fun.angle <- function(one_row, axis, dimension) {
-            return(
-                acos( ( sqrt((one_row[-c(1:dimension)][axis] - one_row[1:dimension][axis])^2) ) / sqrt(sum((one_row[-c(1:dimension)]-one_row[1:dimension])^2)) )
-                )
+            angle <- acos( ( sqrt((one_row[-c(1:dimension)][axis] - one_row[1:dimension][axis])^2) ) / sqrt(sum((one_row[-c(1:dimension)]-one_row[1:dimension])^2)) )
+            return(ifelse(is.nan(angle), 0, angle))
         }
 
         ## Calculate the angles
         output <- apply(one_coordinate, 1, fun.angle, axis = axis, dimension = dimension)
         
         ## Convert degrees
-        if(degree) { output <- output*180/pi}
+        if(degree) {
+            output <- output*180/pi
+        }
 
         return(output)
     }
@@ -182,6 +193,7 @@ coordinates.difference <- function(coordinates, reference, type = "cartesian", a
 
         ## Get the angle
         angles <- acos(dot_prod / (ref_length * obs_length))
+        angles[which(is.nan(angles))] <- 0
 
         if(angle == "degree") {
             angles <- angles * 180 / pi

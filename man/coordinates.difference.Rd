@@ -5,7 +5,7 @@
 \title{Coordinates differences}
 \usage{
 coordinates.difference(coordinates, reference, type = "cartesian",
-  angle = "degree", absolute.distance = TRUE)
+  angle = "degree", absolute.distance = TRUE, rounding = NULL)
 }
 \arguments{
 \item{coordinates}{An \code{array}, \code{list} or \code{matrix} of coordinates to be compared to the reference.}
@@ -17,6 +17,8 @@ coordinates.difference(coordinates, reference, type = "cartesian",
 \item{angle}{optional, whether display angles in radian (\code{"radian"}) or in degrees (\code{"degree"} - default).}
 
 \item{absolute.distance}{\code{logical}, when using \code{"vector"}, whether to use the absolute distance (from the centroid) or the relative one (from the reference landmark). See details.}
+
+\item{rounding}{optional, a tolerance value for rounding pairs of landmarks (passed to \code{\link[base]{round}}), if \code{NULL} (default), no rounding is applied and exact differences are calculated.}
 }
 \description{
 Calculates coordinate differences (e.g. from Procrustes superimpositions)
