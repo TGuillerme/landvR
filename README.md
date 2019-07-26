@@ -51,12 +51,10 @@ Authors and contributors
 If you are using this package, please cite the paper:
 
 * Guillerme, T. and Weisbecker V. (**2019**). landvR: Tools for measuring landmark position variation. Zenodo. [doi:10.5281/zenodo.2620785](https://zenodo.org/record/2620785#.XKLvj6ZS8W8)
-
-[BibTeX](https://zenodo.org/record/2620785/export/hx), [CSL](https://zenodo.org/record/2620785/export/csl), [DataCite](https://zenodo.org/record/2620785/export/dcite3), [Dublin core](https://zenodo.org/record/2620785/export/xd), [Mendeley](https://www.mendeley.com/import/?url=https://zenodo.org/record/2620785), [more...](https://zenodo.org/record/2620785/#.XTpLtlBS8W8)
+##### [BibTeX](https://zenodo.org/record/2620785/export/hx), [CSL](https://zenodo.org/record/2620785/export/csl), [DataCite](https://zenodo.org/record/2620785/export/dcite3), [Dublin core](https://zenodo.org/record/2620785/export/xd), [Mendeley](https://www.mendeley.com/import/?url=https://zenodo.org/record/2620785), [more...](https://zenodo.org/record/2620785/#.XTpLtlBS8W8)
 
 
 If you are using the landmark variation test, please cite the paper:
 
 * Weisbecker, V, Guillerme, T, Speck, C, Sherratt, E, Mehari Abraha, H, Sharp, AC, Terhune, CE, Collins, S, Johnston, S, Panagiotopoulou, O. (**2019**) Individual variation of the masticatory system dominates 3D skull shape in the herbivory-adapted marsupial wombats. BiorXiv692632. [doi.org/10.1101/692632 ](https://www.biorxiv.org/content/10.1101/692632v1.abstract)
-
-[BibTeX](https://www.biorxiv.org/highwire/citation/805260/bibtext), [RIS](https://www.biorxiv.org/highwire/citation/805260/ris), [EndNote (xml)](https://www.biorxiv.org/highwire/citation/805260/endnote-8-xml), [Zotero](https://www.biorxiv.org/highwire/citation/805260/zotero), [more...](https://www.biorxiv.org/content/10.1101/692632v1.abstract)
+##### [BibTeX](https://www.biorxiv.org/highwire/citation/805260/bibtext), [RIS](https://www.biorxiv.org/highwire/citation/805260/ris), [EndNote (xml)](https://www.biorxiv.org/highwire/citation/805260/endnote-8-xml), [Zotero](https://www.biorxiv.org/highwire/citation/805260/zotero), [more...](https://www.biorxiv.org/content/10.1101/692632v1.abstract)
