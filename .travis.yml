@@ -1,39 +1,22 @@
 language: r
+
 cache: packages
-sudo: required
 warnings_are_errors: false
 
-r:
-  - release
-
-# blacklist
-# branches:
-#   except:
-#     - master
-
-# whitelist
-branches:
-  only:
-    - master
-    - release
-
-r_binary_packages:
-  - geomorph
-  - ade4
-  - dispRity
-  - geometry
-  - rgl
-  - zoo
-  - covr
-
-# addons:
-#   apt:
-#     packages:
-#       - libxml2-dev
+addons:
+  apt:
+    update: true
+    sources:
+      - sourceline: 'ppa:opencpu/imagemagick'
+    packages:
+      - libmagick++-dev
       
 branches:
   only:
     - master
 
+# Code coverage
+r_packages:
+  - covr
 after_success:
   - Rscript -e 'library(covr); codecov(token = "0fe8593a-c2ae-465a-a9f9-c8ac244116e3")'
