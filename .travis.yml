@@ -8,8 +8,13 @@ addons:
     update: true
     sources:
       - sourceline: 'ppa:opencpu/imagemagick'
+      - sourceline: 'ppa:ubuntugis/ppa'
+      - sourceline: 'ppa:xorg-edgers'
     packages:
       - libmagick++-dev
+      - libglu1-mesa-dev
+      - freeglut3-dev
+      - mesa-common-dev
 
 branches:
   only:
