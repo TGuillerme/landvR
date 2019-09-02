@@ -27,7 +27,7 @@ landvR v0.3 (2019-09-02)
 
 ## NEW FEATURES
 
- * *New argument* in `procrustes.var.plot`: `col.range` now allows to attribute a range for the color gradient, allowing the color gradients to be absolute (previously they were only relative to the input data - suggest by Pietro Viacava).
+ * *New argument* in `procrustes.var.plot`: `col.range` now allows to attribute a range for the color gradient, allowing the color gradients to be absolute (previously they were only relative to the input data - suggest by [Pietro Viacava](https://github.com/pietroviama)).
 
 ## MINOR IMPROVEMENTS
 
