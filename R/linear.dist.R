@@ -19,8 +19,6 @@
 #' linear.dist(scallops$coorddata, list("a" = c(1,2), "b" = c(2,15)))
 #' 
 #' 
-#' @seealso
-#' 
 #' @author Thomas Guillerme
 #' @export
 

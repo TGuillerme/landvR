@@ -28,8 +28,6 @@ array.to(procrustes, "list")
 ## Transforming it into a matrix
 array.to(procrustes, "matrix")
 
-}
-\seealso{
 
 }
 \author{

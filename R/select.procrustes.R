@@ -27,7 +27,6 @@
 #'                                     factors = list(which(plethodon$species == "Jord"),
 #'                                                    which(plethodon$species == "Teyah")))
 #' 
-#' @seealso
 #' 
 #' @author Thomas Guillerme
 #' @export

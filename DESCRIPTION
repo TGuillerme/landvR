@@ -4,7 +4,7 @@ Author: Thomas Guillerme [aut, cre, cph],
 		Vera Weisbecker [aut, cph],
 Maintainer: Thomas Guillerme <guillert@tcd.ie>
 Version: 0.3
-Date: 2019-01-07
+Date: 2019-09-02
 Description: A package for measuring the variation of 2D and 3D landmarks variation in the Procrustes space based on the geomorph package data format.
 Depends:
     R (>= 3.0.0),

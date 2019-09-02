@@ -19,7 +19,6 @@
 #' ## Transforming it into a matrix
 #' array.to(procrustes, "matrix")
 #'
-#' @seealso
 #' 
 #' @author Thomas Guillerme
 #' @export

@@ -24,6 +24,12 @@ test_that("procrustes.var.plot sanitizing works", {
     expect_null(procrustes.var.plot(M1, M2, col = list("pink", grDevices::rainbow), col.val = var_val))
     expect_null(procrustes.var.plot(M1, M2, col = list(grDevices::heat.colors, grDevices::rainbow), col.val = var_val))
 
+    ## Example plots (with col.range)
+    expect_null(procrustes.var.plot(M1, M2, main = "Uncolored variation"))
+    expect_null(procrustes.var.plot(M1, M2, col = grDevices::heat.colors, col.val = var_val, main = "Relative colours"))
+    expect_null(procrustes.var.plot(M1, M2, col = grDevices::heat.colors, col.val = var_val, col.range = c(0, 0.2), main = "Absolute colours (range = c(0, 0.2))"))
+
+
     ## Loading the scallops 3D data from geomorph
     require(geomorph)
     data(scallops)
