@@ -13,6 +13,9 @@ test_that("area.diff works", {
     expect_error(area.diff(rnorm(10), rnorm(10), rarefy = 10, cent.tend = centroids))
     expect_error(area.diff(rnorm(10), rnorm(10), sort = "a"))
 
+    error <- capture_error(area.diff(rnorm(10), rnorm(10), cent.tend = c))
+    expect_equal(error[[1]], "Central tendency function c must output a single value.")
+
     ## Correct calculations for simple areas
     x <- seq(1:10)
     y <- seq(1:10)

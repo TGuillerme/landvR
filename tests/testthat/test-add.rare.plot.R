@@ -21,6 +21,14 @@ test_that("add.rare.plot works", {
     ## Plotting the results (central tendency)
     expect_null(plot(rarefy_test))
 
+    ## Errors
+    rarefy_error <- rarefy_test; rarefy_error$observed <- NULL
+    error <- capture_error(add.rare.plot(rarefy_error))
+    expect_equal(error[[1]], "x must have an $observed element returned from rand.test().")
+    rarefy_error <- rarefy_test; rarefy_error$observed <- 1
+    error <- capture_error(add.rare.plot(rarefy_error))
+    expect_equal(error[[1]], "x must have an $observed element returned from rand.test().")
+
     ## Add the rarefied observations to the plot
     expect_null(add.rare.plot(rarefy_test))
 

@@ -38,6 +38,9 @@ test_that("coordinates.difference sanitizing works", {
     expect_error(coordinates.difference(coord, angle = "whatever"))
     expect_error(coordinates.difference(coord, absolute.distance = "whatever"))
 
+    ## Works with mshapes
+    expect_true(all(coordinates.difference(geomorph::mshape(proc_super_2D), geomorph::mshape(proc_super_2D), type = "spherical")[[1]] == 0))
+
 })
 
 test_that("cartesian works", {
