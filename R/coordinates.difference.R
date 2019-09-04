@@ -51,6 +51,10 @@ coordinates.difference <- function(coordinates, reference, type = "cartesian", a
     ## Sanitizing
 
     ## Coordinates
+    if(class(coordinates)[1] == "mshape") {
+        ## Coerce into matrix
+        class(coordinates) <- "matrix"
+    }
     coordinates_class <- check.class(coordinates, c("array", "list", "matrix"))
     if(coordinates_class == "matrix") {
         ## Get dimensions
