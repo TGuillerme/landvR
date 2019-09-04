@@ -32,8 +32,9 @@ landvR v0.3 (2019-09-02)
 ## MINOR IMPROVEMENTS
 
  * `coordinates.difference` now has a `rounding` tolerance argument for rounding values (suggest by [Ellen Coombs](https://twitter.com/EllenCoombs)). Also, the function can not produce infinite angles anymore (`NaN` are replaced by `0`).
+ * `variation.range` can now take an `"array"` as the `procrustes` argument.
  * `"mshape"` objects are now automatically coerced as `"matrix"` in `coordinates.difference`.
-
+ * Improved test coverage.
 
 
 landvR v0.2 (2019-02-05)

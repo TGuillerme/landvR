@@ -2,7 +2,7 @@
 #'
 #' @description Selecting the range of differences between the specimen with the maximum and minimum variation
 #'
-#' @param procrustes Procrustes data of class \code{"gpagen"}.
+#' @param procrustes Procrustes data of class \code{"gpagen"} or \code{"array"}.
 #' @param type Which type of coordinates to calculate (see \code{\link{coordinates.difference}} - default is \code{"spherical"}). See details.
 #' @param angle Which type of angle to calculate (see \code{\link{coordinates.difference}} - default is \code{"degree"}).
 #' @param what Which element from the \code{\link{coordinates.difference}} to use (default is \code{"radius"}).
@@ -56,7 +56,15 @@ variation.range <- function(procrustes, type = "spherical", angle = "degree", wh
     match_call <- match.call()
 
     ## procrustes
-    proc_class <- check.class(procrustes, "gpagen")
+    proc_class <- check.class(procrustes, c("gpagen", "array"))
+
+    ## If procrustes is an array make the "gpagen" object
+    if(proc_class == "array") {
+        ## Add the coords and the consensus to the "gpagen" object
+        procrustes <- list(coords = procrustes,
+                           consensus = select.procrustes(procrustes, mean)[[1]])
+        class(procrustes) <- "gpagen"
+    }
 
     ## CI
     if(missing(CI)) {
