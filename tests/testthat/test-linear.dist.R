@@ -19,6 +19,18 @@ test_that("linear.dist works", {
     matrix <- procrustes$coords[,,1]
     list <- array.to(procrustes, "list")
 
+    ## Errors
+    wrong_list <- list ; wrong_list[[40]] <- wrong_list[[40]][,-1, drop = FALSE] 
+    error <- capture_error(linear.dist(wrong_list, c(1,2)))
+    expect_equal(error[[1]], "Not all the specimens have the same number of dimensions!")
+    wrong_list <- list ; wrong_list[[40]] <- wrong_list[[40]][-1,, drop = FALSE] 
+    error <- capture_error(linear.dist(wrong_list, c(1,2)))
+    expect_equal(error[[1]], "Not all the specimens have the same number of landmarks!")
+    error <- capture_error(linear.dist(matrix, 1))
+    expect_equal(error[[1]], "measurements must be a pair of landmarks (or multiple pairs).")
+    error <- capture_error(linear.dist(matrix, c(1, 15)))
+    expect_equal(error[[1]], "landmark IDs in measurements argument cannot be greater than the number of landmarks (12).")
+
 
     ## Right output for a single measurement
     expect_is(

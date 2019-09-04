@@ -41,8 +41,6 @@ coordinates.area <- function(data, what = 1) {
             if(!(what %in% colnames(data))) {
                 stop(paste0(what, " not found in data column names."))
             }
-        } else {
-            stop("what argument must be either of class 'character' or 'numeric'.")
         }
     }
 
