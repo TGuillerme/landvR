@@ -60,7 +60,7 @@ variation.range <- function(procrustes, type = "spherical", angle = "degree", wh
 
     ## If procrustes is an array make the "gpagen" object
     if(proc_class == "array") {
-        ## Add the coords and the consensus to the "gpagen" object
+        ## Add the coords and the consensus to the "gpagen" object
         procrustes <- list(coords = procrustes,
                            consensus = select.procrustes(procrustes, mean)[[1]])
         class(procrustes) <- "gpagen"

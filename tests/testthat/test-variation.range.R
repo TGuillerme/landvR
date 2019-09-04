@@ -20,6 +20,8 @@ test_that("variation.range sanitizing works", {
     expect_error(variation.range(proc_super_2D, what = "bob"))
     expect_error(variation.range(proc_super_2D, return.ID = "FALSE"))
     expect_error(variation.range(proc_super_2D, CI = 1209))
+    error <- capture_error(variation.range(proc_super_2D, CI = -1))
+    expect_equal(error[[1]], "CI must be a percentage or a probability.")
     expect_error(variation.range(proc_super_2D, ordination = "woops"))
     expect_error(variation.range(proc_super_2D, ordination = TRUE, axis = TRUE))
     expect_error(variation.range(proc_super_2D, ordination = TRUE, axis = 0))
@@ -29,10 +31,12 @@ test_that("variation.range sanitizing works", {
     ## No ordination
     test095 <- variation.range(proc_super_2D, CI = 0.95)
     test100 <- variation.range(proc_super_2D)
+    test100_no_ord <- variation.range(proc_super_2D, ordination = FALSE)
     test095ID <- variation.range(proc_super_3D, CI = 0.95, return.ID = TRUE)
     test100ID <- variation.range(proc_super_3D, return.ID = TRUE)
     expect_is(test095, "matrix")
     expect_is(test100, "matrix")
+    expect_equal(test100, test100_no_ord)
     expect_equal(dim(test095), c(12, 2))
     expect_equal(dim(test100), c(12, 2))
     expect_is(test095ID, "list")
@@ -71,5 +75,14 @@ test_that("variation.range sanitizing works", {
     ordination <- stats::prcomp(array_2d, center = TRUE, scale. = FALSE, retx = TRUE, tol = tolerance)
     test100_input <- variation.range(proc_super_2D, ordination = ordination)
     expect_true(all(test100 == test100_input))
+
+    ## Input is an array
+    test100 <- variation.range(proc_super_2D)
+    test_array <- variation.range(proc_super_2D$coords)
+    expect_is(test_array, "matrix")
+    expect_is(test100, "matrix")
+    expect_equal(dim(test_array), c(12, 2))
+    expect_equal(dim(test100), c(12, 2))
+    expect_equal(test100, test_array)
 
 })

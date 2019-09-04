@@ -57,10 +57,7 @@ select.procrustes <- function(procrustes, selector = mean, factors){#, specimen 
 
     ## factors
     if(missing(factors)) {
-        ## Try to return the consensus directly
-        if(specimen == FALSE && class_procrustes == "gpagen" && is.null(match_call$selector)) {
-            return(proc_bkp$consensus)
-        } 
+        ## Don't do factors 
         do_factors <- FALSE
         factor_has_names <- FALSE
     
@@ -86,14 +83,14 @@ select.procrustes <- function(procrustes, selector = mean, factors){#, specimen 
         }
 
         ## Check the factors dimensions and names
-        if(all(class_factors == "character")) {
+        if(all(class_factors == 3)) {
             if(!has_names) {
                 stop(paste0("There are no names in ", as.expression(match_call$procrustes), " matching with the factors argument."))
             } else {
                 ## Checking if the names match
                 matching_names <- lapply(factors, match, coordi_names)
                 if(any(is.na(unlist(matching_names)))) {
-                    stop(paste0("The following names where not found in ", as.expression(match_call$procrustes), ": ", paste(which(is.na(unlist(matching_names))), collapse = ", "), "."))
+                    stop(paste0("The following names where not found in ", as.expression(match_call$procrustes), ": ", paste(factors[which(is.na(unlist(matching_names)))], collapse = ", "), "."))
                 }
             }
             ## Convert the names into numerics
@@ -121,12 +118,12 @@ select.procrustes <- function(procrustes, selector = mean, factors){#, specimen 
         names(selected_procrustes) <- names(factors)
     }
 
-    if(!specimen) {
+    # if(!specimen) {
         ## Return the selected procrustes
         return(selected_procrustes)
     
-    } else {
-        ## Find the closest specimen
-        stop("The function does not work with specimen = TRUE yet.")
-    }
+    # } else {
+    #     ## Find the closest specimen
+    #     stop("The function does not work with specimen = TRUE yet.")
+    # }
 }

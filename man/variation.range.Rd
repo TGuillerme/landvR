@@ -8,7 +8,7 @@ variation.range(procrustes, type = "spherical", angle = "degree",
   what = "radius", ordination, axis, return.ID = FALSE, CI)
 }
 \arguments{
-\item{procrustes}{Procrustes data of class \code{"gpagen"}.}
+\item{procrustes}{Procrustes data of class \code{"gpagen"} or \code{"array"}.}
 
 \item{type}{Which type of coordinates to calculate (see \code{\link{coordinates.difference}} - default is \code{"spherical"}). See details.}
 
