@@ -96,7 +96,7 @@ rand.test <- function(distribution, subset, test, replicates = 100, resample = T
         is_rarefied <- TRUE
         check.class(rarefaction, c("numeric", "integer"))
         check.length(rarefaction, 1, msg = " must be a single numeric value.")
-        if(length(rarefaction) > length(subset)) {
+        if(rarefaction > length(subset)) {
             stop("The rarefaction values is bigger than the subset size.")
         }
     }

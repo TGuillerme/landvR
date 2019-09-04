@@ -96,18 +96,18 @@ procrustes.var.plot <- function(M1, M2, col = list("grey", "black"), col.val, ma
   ## Get the input dimensions
   dim <- unique(c(ncol(M1), ncol(M2)))
   if(length(dim) != 1) {
-    stop("M1 and M2 do not have the same number of dimensions!", .call = FALSE)
+    stop("M1 and M2 do not have the same number of dimensions!")
   }
   if(dim < 2 || dim > 3) {
-    stop("M1 and M2 must be 2D or 3D matrices.", .call = FALSE)
+    stop("M1 and M2 must be 2D or 3D matrices.")
   }
 
   ## Check M1 and M2 for missing data
   if(any(is.na(M1)) == TRUE) {
-    stop("Data contains missing values. Estimate these first (see 'geomorph::estimate.missing').", .call = FALSE)
+    stop("Data in M1 contains missing values. Estimate these first (see 'geomorph::estimate.missing').")
   }
   if(any(is.na(M2)) == TRUE) {
-    stop("Data contains missing values. Estimate these first (see 'geomorph::estimate.missing').", .call = FALSE)
+    stop("Data in M2 contains missing values. Estimate these first (see 'geomorph::estimate.missing').")
   }
 
   ## Check the colour arguments
@@ -115,16 +115,16 @@ procrustes.var.plot <- function(M1, M2, col = list("grey", "black"), col.val, ma
   if(class(col) == "list") {
     col_classes <- unlist(lapply(col, class))
       if(!any(col_classes %in% c("character", "function"))) {
-        stop("col argument must be a single value, vector (of the same number of rows as M1) or function or a list of two of any of the former.", .call = FALSE)
+        stop("col argument must be a single value, vector (of the same number of rows as M1) or function or a list of two of any of the former.")
       }
     col_list <- TRUE
     ## Should have two elements
     if(length(col) > 2) {
-      stop("col argument must be a single value, vector (of the same number of rows as M1) or function or a list of two of any of the former.", .call = FALSE)
+      stop("col argument must be a single value, vector (of the same number of rows as M1) or function or a list of two of any of the former.")
     }
   } else {
     if(!any(class(col) %in% c("character", "function"))) {
-      stop("col argument must be a single value, vector (of the same number of rows as M1) or function or a list of two of any of the former.", .call = FALSE)
+      stop("col argument must be a single value, vector (of the same number of rows as M1) or function or a list of two of any of the former.")
     }
     col_list <- FALSE
     ## Converting into a list for hanging
@@ -141,13 +141,13 @@ procrustes.var.plot <- function(M1, M2, col = list("grey", "black"), col.val, ma
       if(class_col == "character") {
         if(length(col[[sub]]) > 1) {
           if(nrow(M1) < length(col[[sub]])) {
-            stop("col argument must be a single value, vector (of the same number of rows as M1) or function or a list of two of any of the former.", .call = FALSE)
+            stop("col argument must be a single value, vector (of the same number of rows as M1) or function or a list of two of any of the former.")
           }
         } else {
           col[[sub]] <- rep(col[[sub]], nrow(M1))
         }
       } else {
-        stop("col argument must be a single value, vector (of the same number of rows as M1) or function or a list of two of any of the former.", .call = FALSE)
+        stop("col argument must be a single value, vector (of the same number of rows as M1) or function or a list of two of any of the former.")
       }
     } else {
       ## Colour is a function
