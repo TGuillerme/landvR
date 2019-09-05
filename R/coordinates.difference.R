@@ -55,10 +55,10 @@ coordinates.difference <- function(coordinates, reference, type = "cartesian", a
         ## Coerce into matrix
         class(coordinates) <- "matrix"
     }
-    # if(class(reference)[1] == "mshape") {
-    #     ## Coerce into matrix
-    #     class(reference) <- "matrix"
-    # }
+    if(!missing(reference) && class(reference)[1] == "mshape") {
+        ## Coerce into matrix
+        class(reference) <- "matrix"
+    }
 
     ## Coordinates
     coordinates_class <- check.class(coordinates, c("array", "list", "matrix"))
