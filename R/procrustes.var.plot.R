@@ -89,6 +89,17 @@
 
 procrustes.var.plot <- function(M1, M2, col = list("grey", "black"), col.val, magnitude = 1, labels = FALSE, axes = FALSE, pt.size = 1, gridPar, col.range, ...) {
 
+  
+  ## Coercing mshapes
+  if(class(M1)[1] == "mshape") {
+      ## Coerce into matrix
+      class(M1) <- "matrix"
+  }
+  if(class(M2)[1] == "mshape") {
+      ## Coerce into matrix
+      class(M2) <- "matrix"
+  }
+
   ## Check the inputs
   check.class(M1, "matrix")
   check.class(M2, "matrix")

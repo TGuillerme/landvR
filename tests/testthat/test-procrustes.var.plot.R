@@ -43,6 +43,7 @@ test_that("procrustes.var.plot sanitizing works", {
 
     ## Default plot
     expect_null(procrustes.var.plot(M1, M2))
+    expect_warning(expect_null(procrustes.var.plot(geomorph::mshape(proc_super$coords), geomorph::mshape(proc_super$coords))))
     expect_null(procrustes.var.plot(M1, M2, magnitude = 3))
     expect_null(procrustes.var.plot(M1, M2, gridPar = list(tar.out.col = "black", tar.out.cex = 0.1)))
     expect_null(procrustes.var.plot(M1, M2, labels = TRUE, axes = TRUE))
