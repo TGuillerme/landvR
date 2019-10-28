@@ -1,0 +1,138 @@
+---
+title: "Rarefy data along a tree"
+author: "Thomas Guillerme"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    fig_width: 12
+    fig_height: 6
+---
+
+```{r}
+library(ape)
+library(landvR) # Making sure this is v >= 0.4
+```
+
+This vignette shows briefly how to rarefy some data (e.g. geometric morphometric data, PCA scores, etc...) along a tree.
+
+# Data
+
+The data required for this vignette will be a tree (of class `"phylo"`) with species names and a "meta" dataset of specimens with species names and some data (again, the data can be PCA scores, centroid size, etc...).
+
+## The tree
+
+```{r}
+set.seed(42)
+## The tree with five species ("t1", "t2", etc...)
+my_tree <- rcoal(5)
+## What it looks like
+plot(my_tree)
+```
+
+Note that in our example the tree is ultrametric but it doesn't matter.
+Only topology will be used.
+
+## The data
+
+Here we are going to use a simple random bi-variate data.
+The dimensions of your dataset of course depends on you dataset and question.
+Also, here we are going to have a variable (random) number of specimens per species between 5 and 15.
+
+
+```{r}
+## Function for generating specimens for one species
+simulate.specimens <- function(name, sample.range = c(5:15), n.var = 2, var.fun = rnorm, ...) {
+    ## Number of specimens
+    n_spec <- sample(sample.range, 1)
+    ## Get the variables
+    variables <- replicate(n.var, var.fun(n_spec, ...))
+    ## Output the table
+    data.frame(cbind(paste(name, sep = "_", 1:n_spec), rep(name, n_spec)), variables)
+}
+
+## Get all the specimens into a data.frame
+my_data <- do.call(rbind,sapply(my_tree$tip.label, simulate.specimens, simplify = FALSE))
+
+## Giving names for clarity
+colnames(my_data) <- c("specimen", "species", "var1", "var2")
+
+## This is what it looks like
+head(my_data)
+```
+
+This step and the one above is of course just for the purpose of this demonstration.
+You can directly use your own tree and data
+
+# Rarefying a test along a tree
+
+## Getting each clade
+
+First we need to identify and isolate each element from each partition (clade) using a modified version from the `ape::prop.part` function.
+
+```{r}
+## Getting the tree partitions (with singletons)
+clades <- prop.part.names(my_tree, singletons = TRUE)
+
+## Function for getting the dataset for each clade
+get.data.clade <- function(clade, data, species.col.n, data.cols) {
+    return(data[which(data[ ,species.col.n] %in% clade), data.cols])
+}
+
+## Get all the datasets per clades
+data_clades <- lapply(clades, get.data.clade, data = my_data,
+                      species.col.n = 2, data.cols = c(3:4))
+```
+
+## Applying each tests
+
+First we need to define the function that will get us the statistic.
+In our case we want the slope from a linear model (but any statistic can be used):
+
+```{r}
+## Function for getting the slope of a linear model
+my_function <- function(data) {
+    return(lm(data)$coefficients[[2]])
+}
+```
+
+We can then calculate the delta slope (observed - rarefied slope) by using the lowest potential number of specimens in our dataset (5 - see above).
+
+```{r}
+## Getting the rarefied statistics for each clade
+delta_slopes <- lapply(data_clades, rarefy.stat, stat.fun = my_function, rarefaction = 5)
+```
+
+We can also compare them to the slope of the the full dataset:
+
+```{r}
+## Getting the rarefied statistics for each clade
+delta_slopes_overall <- lapply(data_clades, rarefy.stat, stat.fun = my_function, rarefaction = 5,
+                               observed = my_function(my_data[,c(3,4)]))
+```
+
+### Summarising the results
+
+We can then summarise these results per clade size (that's already done in this example) and adding the clade names (if they exist):
+
+```{r}
+## Adding the names to the slopes
+names(delta_slopes) <- unlist(lapply(clades, paste, collapse = "+"))
+names(delta_slopes_overall) <- unlist(lapply(clades, paste, collapse = "+"))
+```
+
+And then transform these statistics into tables to simply plot them with `boxplot`:
+
+```{r, fig.width = 12, fig.height = 12}
+par(mfrow = c(2,1))
+## Combining the results into tables and plotting them
+boxplot(do.call(cbind, delta_slopes),
+        ylab = expression(paste(Delta, "slope")), xlab = "Clade",
+        main = "Slope difference for each clade")
+abline(h = 0, lty = 3)
+boxplot(do.call(cbind, delta_slopes_overall),
+        ylab = expression(paste(Delta, "slope")), xlab = "Clade",
+        main = "Slope difference for each clade (compared to the whole dataset)")
+abline(h = my_function(my_data[,c(3,4)]), lty = 3)
+```
+
+Of course this data is pointless (as it is simulated).
