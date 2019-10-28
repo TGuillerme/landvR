@@ -21,6 +21,13 @@ dispRity 0.2.0 (2016-04-01)
 
   * Blabla
  -->
+landvR v0.4 (2019-10-28)
+=========================
+
+## NEW FEATURES
+
+ * `prop.part.names`: a function for getting names of species within clades.
+ * `rarefy.stat`: a function for rarefying statistics.
 
 landvR v0.3 (2019-09-02)
 =========================
