@@ -16,13 +16,13 @@ Get the names of the tip labels in each bipartition (clade) of a tree.
 }
 \examples{
 ## The partition's tip labels
-prop.part.names(rtree(5))
+prop.part.names(ape::rtree(5))
 
 ## The partition's tip labels (including singletons)
-prop.part.names(rtree(3), singletons = TRUE)
+prop.part.names(ape::rtree(3), singletons = TRUE)
 
 ## The partition's tip labels of a list of trees
-lapply(rmtree(2, 3), prop.part.names)
+lapply(ape::rmtree(2, 3), prop.part.names)
 
 }
 \seealso{

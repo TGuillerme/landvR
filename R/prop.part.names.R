@@ -7,18 +7,19 @@
 #' 
 #' @examples
 #' ## The partition's tip labels
-#' prop.part.names(rtree(5))
+#' prop.part.names(ape::rtree(5))
 #' 
 #' ## The partition's tip labels (including singletons)
-#' prop.part.names(rtree(3), singletons = TRUE)
+#' prop.part.names(ape::rtree(3), singletons = TRUE)
 #' 
 #' ## The partition's tip labels of a list of trees
-#' lapply(rmtree(2, 3), prop.part.names)
+#' lapply(ape::rmtree(2, 3), prop.part.names)
 #'
 #' @seealso \code{\link[ape]{prop.part}}
 #' 
 #' @author Thomas Guillerme
 #' @export
+#' @importFrom ape prop.part
 
 prop.part.names <- function(phy, singletons = FALSE) {
     ## Sanitizing
@@ -30,7 +31,7 @@ prop.part.names <- function(phy, singletons = FALSE) {
     }
 
     ## Get the bipartitions
-    clades <- prop.part(phy)
+    clades <- ape::prop.part(phy)
 
     ## Get the tips names for each clades
     clades <- lapply(clades, function(clade, labels) labels[clade], labels = attr(clades, "labels"))
