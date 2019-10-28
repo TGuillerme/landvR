@@ -1,5 +1,5 @@
 context("prop.part.names")
-
+library(ape)
 ## Test
 test_that("prop.part.names works", {
 

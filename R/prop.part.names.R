@@ -19,7 +19,9 @@
 #' 
 #' @author Thomas Guillerme
 #' @export
-#' @importFrom ape prop.part
+# @importFrom ape prop.part
+# @importFrom ape rtree
+# @importFrom ape rmtree
 
 prop.part.names <- function(phy, singletons = FALSE) {
     ## Sanitizing
