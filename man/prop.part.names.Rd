@@ -26,7 +26,7 @@ lapply(rmtree(2, 3), prop.part.names)
 
 }
 \seealso{
-\code{\link[ape]}{prop.part}
+\code{\link[ape]{prop.part}}
 }
 \author{
 Thomas Guillerme

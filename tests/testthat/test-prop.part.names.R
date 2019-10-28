@@ -6,12 +6,12 @@ test_that("prop.part.names works", {
     ## Sanitizing
     error <- capture_error(prop.part.names("1"))
     expect_equal(error[[1]], "phy must be a \"phylo\" object.")
-    error <- capture_error(prop.part.names(rtree(4), singletons = "FALSE"))
+    error <- capture_error(prop.part.names(ape::rtree(4), singletons = "FALSE"))
     expect_equal(error[[1]], "singletons must be logical.")
 
     ## Right (simple) output
     set.seed(1)
-    test_tree <- rtree(5)
+    test_tree <- ape::rtree(5)
     test_names <- prop.part.names(test_tree)
     expect_names <- list(c("t2", "t1", "t3", "t4", "t5"), c("t1", "t3", "t4", "t5"), c("t1", "t3", "t4"), c("t3", "t4"))
     expect_is(

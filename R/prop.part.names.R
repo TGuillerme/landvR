@@ -15,7 +15,7 @@
 #' ## The partition's tip labels of a list of trees
 #' lapply(rmtree(2, 3), prop.part.names)
 #'
-#' @seealso \code{\link[ape]}{prop.part}
+#' @seealso \code{\link[ape]{prop.part}}
 #' 
 #' @author Thomas Guillerme
 #' @export
