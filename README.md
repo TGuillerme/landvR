@@ -34,10 +34,10 @@ library(landvR)
 A detailed vignette for performing the landmark Procrustes coordinates variation test is available [online](https://cdn.rawgit.com/TGuillerme/landvR/8a6a6bd5/inst/vignettes/Landmark_partition_test.html) or as in [Rmd](https://github.com/TGuillerme/landvR/blob/master/inst/vignettes/Landmark_partition_test.Rmd).
 
 ## Latest patch notes
-* 2018/11/29 - v0.2
+* 2019/10/28 - v0.4
 
-  * `linear.dist` function to measure linear distances between pairs of landmarks.
-  * `array.to` utility function for converting `gpagen` arrays to lists or matrices.
+ * `prop.part.names`: a function for getting names of species within clades.
+ * `rarefy.stat`: a function for rarefying statistics.
 
 Previous patch notes and notes for the *next version* can be seen [here](https://github.com/TGuillerme/landvR/blob/master/NEWS.md).
 
@@ -50,11 +50,11 @@ Authors and contributors
 -------
 If you are using this package, please cite the paper:
 
-* Guillerme, T. and Weisbecker V. (**2019**). landvR: Tools for measuring landmark position variation. Zenodo. [doi:10.5281/zenodo.2620785](https://zenodo.org/record/2620785#.XKLvj6ZS8W8)
+* Guillerme, T and Weisbecker V (**2019**). landvR: Tools for measuring landmark position variation. Zenodo. [doi:10.5281/zenodo.2620785](https://zenodo.org/record/2620785#.XKLvj6ZS8W8)
     ##### [BibTeX](https://zenodo.org/record/2620785/export/hx), [CSL](https://zenodo.org/record/2620785/export/csl), [DataCite](https://zenodo.org/record/2620785/export/dcite3), [Dublin core](https://zenodo.org/record/2620785/export/xd), [Mendeley](https://www.mendeley.com/import/?url=https://zenodo.org/record/2620785), [more...](https://zenodo.org/record/2620785/#.XTpLtlBS8W8)
 
 
 If you are using the landmark variation test, please cite the paper:
 
-* Weisbecker, V, Guillerme, T, Speck, C, Sherratt, E, Mehari Abraha, H, Sharp, AC, Terhune, CE, Collins, S, Johnston, S, Panagiotopoulou, O. (**2019**) Individual variation of the masticatory system dominates 3D skull shape in the herbivory-adapted marsupial wombats. BiorXiv692632. [doi.org/10.1101/692632 ](https://www.biorxiv.org/content/10.1101/692632v1.abstract)
-    ##### [BibTeX](https://www.biorxiv.org/highwire/citation/805260/bibtext), [RIS](https://www.biorxiv.org/highwire/citation/805260/ris), [EndNote (xml)](https://www.biorxiv.org/highwire/citation/805260/endnote-8-xml), [Zotero](https://www.biorxiv.org/highwire/citation/805260/zotero), [more...](https://www.biorxiv.org/content/10.1101/692632v1.abstract)
+* Weisbecker, V, Guillerme, T, Speck, C, Sherratt, E, Mehari Abraha, H, Sharp, AC, Terhune, CE, Collins, S, Johnston, S, Panagiotopoulou, O. (**2019**) Individual variation of the masticatory system dominates 3D skull shape in the herbivory-adapted marsupial wombats. *Frontiers in Zoology*, 16, 41. [10.1186/s12983-019-0338-5](https://frontiersinzoology.biomedcentral.com/articles/10.1186/s12983-019-0338-5)
+    ##### [RIS](https://frontiersinzoology.biomedcentral.com/articles/10.1186/s12983-019-0338-5.ris), [more...](https://frontiersinzoology.biomedcentral.com/articles/10.1186/s12983-019-0338-5#citeas)
