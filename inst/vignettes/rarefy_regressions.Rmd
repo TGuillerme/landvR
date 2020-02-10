@@ -14,6 +14,8 @@ library(landvR) # Making sure this is v >= 0.4
 ```
 
 This vignette shows briefly how to rarefy some data (e.g. geometric morphometric data, PCA scores, etc...) along a tree.
+An empirical example of this work is currently in review but can be found through [Ariel's repeatable GitHub page](https://github.com/miracleray/allometry-rodents).
+If you use this method, please contact [Thomas](mailto:guillert@tcd.ie) or [Ariel](mailto:a.marcy@uq.edu.au) to figure out how to cite it (while the paper is still in review).
 
 # Data
 
@@ -70,6 +72,22 @@ You can directly use your own tree and data
 First we need to identify and isolate each element from each partition (clade) using a modified version from the `ape::prop.part` function.
 
 ```{r}
+## A modified version of the ape::prop.part function:
+prop.part.names <- function(phy, singletons = FALSE) {
+    ## Get the bipartitions
+    clades <- ape::prop.part(phy)
+
+    ## Get the tips names for each clades
+    clades <- lapply(clades, function(clade, labels) labels[clade], labels = attr(clades, "labels"))
+
+    ## Add the tip names
+    if(singletons) {
+        clades <- c(clades, as.list(phy$tip.label))
+    }
+
+    return(clades)
+}
+
 ## Getting the tree partitions (with singletons)
 clades <- prop.part.names(my_tree, singletons = TRUE)
 
@@ -146,8 +164,33 @@ In other words the estimated slope is not different than the observed slope (of 
 Now as you've probably noticed, we switched from slopes to angles in the paragraph above.
 This is actually pretty easy using some good old trigonometry:
 
-$Difference angle = tan(\frac{\text{median estimated slope} - \text{observed slope}}{1 + \text{median estimated slope} * \text{observed slope}})$
+$Difference angle = atan(\frac{\text{median estimated slope} - \text{observed slope}}{1 + \text{median estimated slope} * \text{observed slope}}) * frac{180}/\pi$
 
 We can then calculate that for all the slopes.
+
+```{r}
+## Function for testing significant slope changes
+test.delta.slope <- function(obs.slope, delta.slope, significance) {
+    ## Calculating the angle in degrees
+    angle <- abs(atan(delta.slope/(1 + obs.slope * (obs.slope + delta.slope))) * 180/pi)
+    if(!missing(significance)) {
+        ## Testing for significance
+        return(ifelse(angle < significance, TRUE, FALSE))
+    } else {
+        ## Simply returning the angle
+        return(angle)
+    }
+}
+
+
+
+# Test our dataset
+med.delta.slopes <- unlist(lapply(delta.slopes, median))
+med.delta.slopes[which(is.na(med.delta.slopes))] <- 0  # account for NAs
+is.parallel <- test.delta.slope(obs.slopes, med.delta.slopes, significance = 4.5)
+sum(is.parallel)  # number of clades with less than 4.5 deg angle change
+# Get delta angle change values for plotting 
+angle.changes <- test.delta.slope(obs.slopes, med.delta.slopes)
+```
 
 And plot it to visualise which slope is above and below the significant levels.

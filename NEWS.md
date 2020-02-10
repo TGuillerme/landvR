@@ -21,19 +21,14 @@ dispRity 0.2.0 (2016-04-01)
 
   * Blabla
  -->
-landvR v0.4 (2019-10-28)
+landvR v0.5 (2020-02-10)
 =========================
 
 ## NEW FEATURES
 
  * `prop.part.names`: a function for getting names of species within clades.
  * `rarefy.stat`: a function for rarefying statistics.
-
-landvR v0.3 (2019-09-02)
-=========================
-
-## NEW FEATURES
-
+ * `slope.diff`: a function for measuring slope differences. 
  * *New argument* in `procrustes.var.plot`: `col.range` now allows to attribute a range for the color gradient, allowing the color gradients to be absolute (previously they were only relative to the input data - suggest by [Pietro Viacava](https://github.com/pietroviama)).
 
 ## MINOR IMPROVEMENTS
