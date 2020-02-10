@@ -1,6 +1,6 @@
 ---
 title: "Rarefy data along a tree"
-author: "Thomas Guillerme"
+author: "Thomas Guillerme, Ariel Marcy"
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -136,3 +136,18 @@ abline(h = my_function(my_data[,c(3,4)]), lty = 3)
 ```
 
 Of course this data is pointless (as it is simulated).
+
+#### A significant point
+
+Once we have all the slope differences, it could be interesting to figure out a statistical threshold above which we can consider slopes as different.
+Theoretically, the estimated allometric slope can only be different up to a maximum of 90˚ angle of the observed slope (an orthogonal allometric slope) so we can consider a conservative angle difference of 4.5˚ as our threshold (5% of 90˚): a median estimated angle difference below 4.5˚ would then mean that the angles between our estimated slopes and the observed slope would be not significantly different than 0.
+In other words the estimated slope is not different than the observed slope (of course, depending on our significance threshold value).
+
+Now as you've probably noticed, we switched from slopes to angles in the paragraph above.
+This is actually pretty easy using some good old trigonometry:
+
+$Difference angle = arcsin(\frac{\text{median estimated slope} - \text{observed slope}}{1 + \text{observed slope} * \text{median estimated slope}})$
+
+We can then calculate that for all the slopes.
+
+And plot it to visualise which slope is above and below the significant levels.
