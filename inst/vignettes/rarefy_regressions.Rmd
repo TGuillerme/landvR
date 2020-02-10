@@ -108,24 +108,29 @@ In our case we want the slope from a linear model (but any statistic can be used
 
 ```{r}
 ## Function for getting the slope of a linear model
-my_function <- function(data) {
+get.slope <- function(data) {
     return(lm(data)$coefficients[[2]])
 }
 ```
 
-We can then calculate the delta slope (observed - rarefied slope) by using the lowest potential number of specimens in our dataset (5 - see above).
+We can then calculate the estimated slope difference (observed - rarefied slope) by using the lowest potential number of specimens in our dataset (5 - see above).
 
 ```{r}
+## Getting the observed slopes
+observed_slopes <- unlist(lapply(data_clades, get.slope))
+
 ## Getting the rarefied statistics for each clade
-delta_slopes <- lapply(data_clades, rarefy.stat, stat.fun = my_function, rarefaction = 5)
+estimated_slopes_differences <- lapply(data_clades, rarefy.stat,
+                                       stat.fun = get.slope, rarefaction = 5)
 ```
 
 We can also compare them to the slope of the the full dataset:
 
 ```{r}
 ## Getting the rarefied statistics for each clade
-delta_slopes_overall <- lapply(data_clades, rarefy.stat, stat.fun = my_function, rarefaction = 5,
-                               observed = my_function(my_data[,c(3,4)]))
+estimated_slopes_differences_overall <- lapply(data_clades, rarefy.stat,
+                                               stat.fun = get.slope, rarefaction = 5,
+                                               observed = get.slope(my_data[,c(3,4)]))
 ```
 
 ### Summarising the results
@@ -134,8 +139,9 @@ We can then summarise these results per clade size (that's already done in this 
 
 ```{r}
 ## Adding the names to the slopes
-names(delta_slopes) <- unlist(lapply(clades, paste, collapse = "+"))
-names(delta_slopes_overall) <- unlist(lapply(clades, paste, collapse = "+"))
+names(estimated_slopes_differences) <- unlist(lapply(clades, paste, collapse = "+"))
+names(estimated_slopes_differences_overall) <- names(estimated_slopes_differences)
+names(observed_slopes) <- names(estimated_slopes_differences)
 ```
 
 And then transform these statistics into tables to simply plot them with `boxplot`:
@@ -143,14 +149,14 @@ And then transform these statistics into tables to simply plot them with `boxplo
 ```{r, fig.width = 12, fig.height = 12}
 par(mfrow = c(2,1))
 ## Combining the results into tables and plotting them
-boxplot(do.call(cbind, delta_slopes),
-        ylab = expression(paste(Delta, "slope")), xlab = "Clade",
+boxplot(do.call(cbind, estimated_slopes_differences),
+        ylab = "Estimated slopes", xlab = "Clade",
         main = "Slope difference for each clade")
 abline(h = 0, lty = 3)
-boxplot(do.call(cbind, delta_slopes_overall),
-        ylab = expression(paste(Delta, "slope")), xlab = "Clade",
+boxplot(do.call(cbind, estimated_slopes_differences_overall),
+        ylab = "Estimated slopes", xlab = "Clade",
         main = "Slope difference for each clade (compared to the whole dataset)")
-abline(h = my_function(my_data[,c(3,4)]), lty = 3)
+abline(h = get.slope(my_data[,c(3,4)]), lty = 3)
 ```
 
 Of course this data is pointless (as it is simulated).
@@ -169,28 +175,24 @@ $Difference angle = atan(\frac{\text{median estimated slope} - \text{observed sl
 We can then calculate that for all the slopes.
 
 ```{r}
-## Function for testing significant slope changes
-test.delta.slope <- function(obs.slope, delta.slope, significance) {
-    ## Calculating the angle in degrees
-    angle <- abs(atan(delta.slope/(1 + obs.slope * (obs.slope + delta.slope))) * 180/pi)
-    if(!missing(significance)) {
-        ## Testing for significance
-        return(ifelse(angle < significance, TRUE, FALSE))
-    } else {
-        ## Simply returning the angle
-        return(angle)
-    }
+## Getting the slope differences for each estimated slope
+slope_angles <- list()
+for(one_clade in 1:length(observed_slopes)) {
+    ## Calculating the slope differences in angles per clade
+    slope_angles[[one_clade]] <- slope.diff(estimated_slopes_differences[[one_clade]],
+                                           observed_slopes[[one_clade]])
 }
-
-
-
-# Test our dataset
-med.delta.slopes <- unlist(lapply(delta.slopes, median))
-med.delta.slopes[which(is.na(med.delta.slopes))] <- 0  # account for NAs
-is.parallel <- test.delta.slope(obs.slopes, med.delta.slopes, significance = 4.5)
-sum(is.parallel)  # number of clades with less than 4.5 deg angle change
-# Get delta angle change values for plotting 
-angle.changes <- test.delta.slope(obs.slopes, med.delta.slopes)
+names(slope_angles) <- names(estimated_slopes_differences)
 ```
 
-And plot it to visualise which slope is above and below the significant levels.
+And visualise the results
+
+```{r}
+## Displaying the results
+boxplot(slope_angles, ylim = c(0, 90), ylab = "Slope difference (in degrees)", xlab = "Clade")
+abline(h = 4.5, lty = 2)
+text(2, 6, "Significance threshold (4.5 degrees)", cex = 0.75)
+```
+
+In this made up example, we can see that the slopes are hard to estimate for individual taxa (t1 to t5) but not for the higher clades.
+In other words the slope measured for the individual taxa is influenced by the number of observations (e.g. specimens) while this is not the case for the higher clades.
