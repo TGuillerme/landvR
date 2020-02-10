@@ -46,6 +46,7 @@ Authors and contributors
 
 * [Thomas Guillerme](http://tguillerme.github.io)
 * [Vera Weisbecker](http://weisbeckerlab.com.au)
+* [Ariel Marcy](https://github.com/miracleray/)
 
 -------
 If you are using this package, please cite the paper:
