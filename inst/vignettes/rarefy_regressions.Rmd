@@ -170,7 +170,7 @@ In other words the estimated slope is not different than the observed slope (of 
 Now as you've probably noticed, we switched from slopes to angles in the paragraph above.
 This is actually pretty easy using some good old trigonometry:
 
-$Difference angle = atan(\frac{\text{median estimated slope} - \text{observed slope}}{1 + \text{median estimated slope} * \text{observed slope}}) * frac{180}/\pi$
+$\text{Angle difference} = atan(\frac{\text{estimated slope} - \text{observed slope}}{1 + \text{estimated slope} \times \text{observed slope}}) \times \frac{180}{\pi}$
 
 We can then calculate that for all the slopes.
 

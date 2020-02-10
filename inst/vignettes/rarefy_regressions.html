@@ -326,7 +326,7 @@ abline(h = get.slope(my_data[,c(3,4)]), lty = 3)</code></pre>
 <h4>A significant point</h4>
 <p>Once we have all the slope differences, it could be interesting to figure out a statistical threshold above which we can consider slopes as different. Theoretically, the estimated allometric slope can only be different up to a maximum of 90˚ angle of the observed slope (an orthogonal allometric slope) so we can consider a conservative angle difference of 4.5˚ as our threshold (5% of 90˚): a median estimated angle difference below 4.5˚ would then mean that the angles between our estimated slopes and the observed slope would be not significantly different than 0. In other words the estimated slope is not different than the observed slope (of course, depending on our significance threshold value).</p>
 <p>Now as you’ve probably noticed, we switched from slopes to angles in the paragraph above. This is actually pretty easy using some good old trigonometry:</p>
-<p><span class="math inline">\(Difference angle = atan(\frac{\text{median estimated slope} - \text{observed slope}}{1 + \text{median estimated slope} * \text{observed slope}}) * frac{180}/\pi\)</span></p>
+<p><span class="math inline">\(\text{Angle difference} = atan(\frac{\text{estimated slope} - \text{observed slope}}{1 + \text{estimated slope} \times \text{observed slope}}) \times \frac{180}{\pi}\)</span></p>
 <p>We can then calculate that for all the slopes.</p>
 <pre class="r"><code>## Getting the slope differences for each estimated slope
 slope_angles &lt;- list()
