@@ -1,5 +1,5 @@
 ---
-title: "Rarefy data along a tree"
+title: "Rarefy linear regressions along a tree"
 author: "Thomas Guillerme, Ariel Marcy"
 date: "`r Sys.Date()`"
 output:
@@ -14,10 +14,12 @@ library(landvR) # Making sure this is v >= 0.4
 ```
 
 This vignette shows briefly how to rarefy some data (e.g. geometric morphometric data, PCA scores, etc...) along a tree.
-An empirical example of this work is currently in review but can be found through [Ariel's repeatable GitHub page](https://github.com/miracleray/allometry-rodents).
+An empirical example of this work is currently in review but can be found through [Ariel's repeatable GitHub page](https://github.com/miracleray/allometry-rodents/blob/master/Analysis/05-phylogenetic-rarefaction.Rmd).
 If you use this method, please contact [Thomas](mailto:guillert@tcd.ie) or [Ariel](mailto:a.marcy@uq.edu.au) to figure out how to cite it (while the paper is still in review).
 
 # Data
+
+> Note that the following section (all the way up to [Rarefying a test along a tree](#rarefy)) are not required if you have your own dataset already. This is just some simulated example data. Feel free to skip!
 
 The data required for this vignette will be a tree (of class `"phylo"`) with species names and a "meta" dataset of specimens with species names and some data (again, the data can be PCA scores, centroid size, etc...).
 
@@ -65,7 +67,7 @@ head(my_data)
 This step and the one above is of course just for the purpose of this demonstration.
 You can directly use your own tree and data
 
-# Rarefying a test along a tree
+# Rarefying a test along a tree {#rarefy}
 
 ## Getting each clade
 
@@ -99,6 +101,7 @@ get.data.clade <- function(clade, data, species.col.n, data.cols) {
 ## Get all the datasets per clades
 data_clades <- lapply(clades, get.data.clade, data = my_data,
                       species.col.n = 2, data.cols = c(3:4))
+# here data.cols = c(3:4) correspond to the column numbers of interest
 ```
 
 ## Applying each tests
