@@ -4,8 +4,16 @@
 \alias{variation.range}
 \title{Range of variation}
 \usage{
-variation.range(procrustes, type = "spherical", angle = "degree",
-  what = "radius", ordination, axis, return.ID = FALSE, CI)
+variation.range(
+  procrustes,
+  type = "spherical",
+  angle = "degree",
+  what = "radius",
+  ordination,
+  axis,
+  return.ID = FALSE,
+  CI
+)
 }
 \arguments{
 \item{procrustes}{Procrustes data of class \code{"gpagen"} or \code{"array"}.}

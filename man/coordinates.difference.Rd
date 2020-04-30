@@ -4,8 +4,14 @@
 \alias{coordinates.difference}
 \title{Coordinates differences}
 \usage{
-coordinates.difference(coordinates, reference, type = "cartesian",
-  angle = "degree", absolute.distance = TRUE, rounding = NULL)
+coordinates.difference(
+  coordinates,
+  reference,
+  type = "cartesian",
+  angle = "degree",
+  absolute.distance = TRUE,
+  rounding = NULL
+)
 }
 \arguments{
 \item{coordinates}{An \code{array}, \code{list} or \code{matrix} of coordinates to be compared to the reference.}

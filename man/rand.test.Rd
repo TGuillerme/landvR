@@ -4,9 +4,18 @@
 \alias{rand.test}
 \title{Random test}
 \usage{
-rand.test(distribution, subset, test, replicates = 100,
-  resample = TRUE, rarefaction, test.parameter = FALSE, parameter,
-  alternative = "two-sided", ...)
+rand.test(
+  distribution,
+  subset,
+  test,
+  replicates = 100,
+  resample = TRUE,
+  rarefaction,
+  test.parameter = FALSE,
+  parameter,
+  alternative = "two-sided",
+  ...
+)
 }
 \arguments{
 \item{distribution}{A \code{numeric} distribution to draw from.}
