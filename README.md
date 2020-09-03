@@ -31,7 +31,16 @@ library(landvR)
 
 ## Vignettes and manuals
 
-A detailed vignette for performing the landmark Procrustes coordinates variation test is available [online](https://cdn.rawgit.com/TGuillerme/landvR/8a6a6bd5/inst/vignettes/Landmark_partition_test.html) or as in [Rmd](https://github.com/TGuillerme/landvR/blob/master/inst/vignettes/Landmark_partition_test.Rmd).
+The packages comes with several vignettes (some of them are still drafts) on:
+
+ * How to perform the landmark Procrustes coordinates variation test: [online](https://cdn.rawgit.com/TGuillerme/landvR/8a6a6bd5/inst/vignettes/Landmark_partition_test.html) or as in [Rmd](https://github.com/TGuillerme/landvR/blob/master/inst/vignettes/Landmark_partition_test.Rmd).
+
+ * Some different systems for looking at landmark variation (displacement): [online](https://raw.githack.com/TGuillerme/landvR/master/inst/vignettes/Landmark_variation_differences.html) or as in [Rmd](https://github.com/TGuillerme/landvR/blob/master/inst/vignettes/Landmark_variation_differences.Rmd).
+
+ * Using landmark variation area as an alternative approach to Procrustes distance: [online](https://raw.githack.com/TGuillerme/landvR/master/inst/vignettes/Procrustes_dist_vs_landmark_integral.html) or as in [Rmd](https://github.com/TGuillerme/landvR/blob/master/inst/vignettes/Procrustes_dist_vs_landmark_integral.Rmd).
+
+ * How to rarefy a statistical test along a phylogeny: [online](https://raw.githack.com/TGuillerme/landvR/master/inst/vignettes/rarefy_regressions.html) or as in [Rmd](https://github.com/TGuillerme/landvR/blob/master/inst/vignettes/rarefy_regressions.Rmd).
+
 
 ## Latest patch notes
 * 2019/10/28 - v0.4
