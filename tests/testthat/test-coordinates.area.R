@@ -30,8 +30,8 @@ test_that("coordinates.area sanitizing works", {
     expect_equal(round(coordinates.area(diff_2D[[1]], 4), digits = 5), -0.00585)
     
     ## Work with specific what
-    expect_equal(round(coordinates.area(diff_2D_coord[[2]], what = "radius"), digits = 5), 0.16272)
+    expect_equal(round(coordinates.area(diff_2D_coord[[2]], what = "radius"), digits = 4), 0.1627)
     expect_equal(round(coordinates.area(diff_2D_coord[[2]], what = "azimuth")), 476)
-    expect_equal(round(coordinates.area(diff_3D[[3]], what = "length"), digits = 5), 1.28929)
+    expect_equal(round(coordinates.area(diff_3D[[3]], what = "length"), digits = 4), 1.2893)
     expect_equal(round(coordinates.area(diff_3D[[3]], what = "angle")), 420)
 })

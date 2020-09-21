@@ -59,29 +59,29 @@ test_that("procrustes.var.plot sanitizing works", {
     expect_null(procrustes.var.plot(M1, M2, col = grDevices::heat.colors, col.val = var_val, col.range = c(0, 0.2), main = "Absolute colours (range = c(0, 0.2))"))
 
 
-    ## Loading the scallops 3D data from geomorph
-    require(geomorph)
-    data(scallops)
+    # ## Loading the scallops 3D data from geomorph
+    # require(geomorph)
+    # data(scallops)
 
-    ## Procrustes superimposition
-    procrustes <- gpagen(scallops$coorddata, print.progress = FALSE)
+    # ## Procrustes superimposition
+    # procrustes <- gpagen(scallops$coorddata, print.progress = FALSE)
 
-    ## Getting the range of variation
-    variation <- variation.range(procrustes, return.ID = TRUE)
+    # ## Getting the range of variation
+    # variation <- variation.range(procrustes, return.ID = TRUE)
 
-    ## Selecting the coordinates and the variation vector
-    M1 <- procrustes$coords[, , variation$min.max[1]]
-    M2 <- procrustes$coords[, , variation$min.max[2]]
-    var_val <- variation$range[, 1]
+    # ## Selecting the coordinates and the variation vector
+    # M1 <- procrustes$coords[, , variation$min.max[1]]
+    # M2 <- procrustes$coords[, , variation$min.max[2]]
+    # var_val <- variation$range[, 1]
      
-    ## Default plot
-    expect_null(procrustes.var.plot(M1, M2))
-    expect_null(procrustes.var.plot(M1, M2, labels = TRUE, axes = TRUE))
-    expect_null(procrustes.var.plot(M1, M2, col = list(grDevices::rainbow, "pink"), col.val = var_val, pt.size = 2.5))
-    expect_null(procrustes.var.plot(M1, M2, col = grDevices::rainbow, col.val = var_val))
-    expect_null(procrustes.var.plot(M1, M2, col = "pink", col.val = var_val))
-    expect_null(procrustes.var.plot(M1, M2, col = list("pink", grDevices::rainbow), col.val = var_val))
-    expect_null(procrustes.var.plot(M1, M2, col = list(grDevices::heat.colors, grDevices::rainbow), col.val = var_val))
+    # ## Default plot
+    # expect_null(procrustes.var.plot(M1, M2))
+    # expect_null(procrustes.var.plot(M1, M2, labels = TRUE, axes = TRUE))
+    # expect_null(procrustes.var.plot(M1, M2, col = list(grDevices::rainbow, "pink"), col.val = var_val, pt.size = 2.5))
+    # expect_null(procrustes.var.plot(M1, M2, col = grDevices::rainbow, col.val = var_val))
+    # expect_null(procrustes.var.plot(M1, M2, col = "pink", col.val = var_val))
+    # expect_null(procrustes.var.plot(M1, M2, col = list("pink", grDevices::rainbow), col.val = var_val))
+    # expect_null(procrustes.var.plot(M1, M2, col = list(grDevices::heat.colors, grDevices::rainbow), col.val = var_val))
 
 
 })
