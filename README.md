@@ -68,3 +68,6 @@ If you are using the landmark variation test, please cite the paper:
 
 * Weisbecker, V, Guillerme, T, Speck, C, Sherratt, E, Mehari Abraha, H, Sharp, AC, Terhune, CE, Collins, S, Johnston, S, Panagiotopoulou, O. (**2019**) Individual variation of the masticatory system dominates 3D skull shape in the herbivory-adapted marsupial wombats. *Frontiers in Zoology*, 16, 41. [10.1186/s12983-019-0338-5](https://frontiersinzoology.biomedcentral.com/articles/10.1186/s12983-019-0338-5)
     ##### [RIS](https://frontiersinzoology.biomedcentral.com/articles/10.1186/s12983-019-0338-5.ris), [more...](https://frontiersinzoology.biomedcentral.com/articles/10.1186/s12983-019-0338-5#citeas)
+    
+    
+You can find a list of papers that cited `landvR` and got picked by google scholar [here](https://scholar.google.co.uk/scholar?oi=bibs&hl=en&cites=3216410024546316584).
