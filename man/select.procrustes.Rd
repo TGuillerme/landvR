@@ -4,7 +4,7 @@
 \alias{select.procrustes}
 \title{Select Procrustes values}
 \usage{
-select.procrustes(procrustes, selector = mean, factors)
+select.procrustes(procrustes, selector = base::mean, factors)
 }
 \arguments{
 \item{procrustes}{Procrustes data of class \code{"gpagen"} or an \code{"array"} or \code{"list"} of coordinates.}
@@ -28,7 +28,7 @@ data(plethodon)
 procrustes <- geomorph::gpagen(plethodon$land, print.progress = FALSE)
 
 ## Selecting the mean Procrustes
-mean_procrustes <- select.procrustes(procrustes, selector = mean)
+mean_procrustes <- select.procrustes(procrustes, selector = base::mean)
 
 ## Selecting the minimum Procrustes shape for each species
 min_procrustes <- select.procrustes(procrustes, selector = min,

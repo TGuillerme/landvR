@@ -20,7 +20,7 @@
 #' procrustes <- geomorph::gpagen(plethodon$land, print.progress = FALSE)
 #' 
 #' ## Selecting the mean Procrustes
-#' mean_procrustes <- select.procrustes(procrustes, selector = mean)
+#' mean_procrustes <- select.procrustes(procrustes, selector = base::mean)
 #'
 #' ## Selecting the minimum Procrustes shape for each species
 #' min_procrustes <- select.procrustes(procrustes, selector = min,
@@ -31,7 +31,7 @@
 #' @author Thomas Guillerme
 #' @export
 
-select.procrustes <- function(procrustes, selector = mean, factors){#, specimen = FALSE) {
+select.procrustes <- function(procrustes, selector = base::mean, factors){#, specimen = FALSE) {
 
     match_call <- match.call()
 

@@ -11,9 +11,9 @@ test_that("select.procrustes sanitizing works", {
 
     ## Sanitizing
     expect_error(select.procrustes(proc_super_2D, selector = "mean"))
-    expect_error(select.procrustes(proc_super_2D, selector = mean, factors = "bla"))
+    expect_error(select.procrustes(proc_super_2D, selector = base::mean, factors = "bla"))
     expect_error(select.procrustes(proc_super_2D$coords, selector = var))
-    error <- capture_error(select.procrustes(proc_super_2D, factors = list(mean, var)))
+    error <- capture_error(select.procrustes(proc_super_2D, factors = list(base::mean, var)))
     expect_equal(error[[1]], "factors must be of class integer or numeric or character.")
     error <- capture_error(select.procrustes(proc_super_2D, factors = list("a", "b", "c")))
     expect_equal(error[[1]], "There are no names in proc_super_2D matching with the factors argument.")
@@ -23,10 +23,10 @@ test_that("select.procrustes sanitizing works", {
     expect_equal(error[[1]], "The following names where not found in named_spec: sp41.")    
 
     ## Should be equal to the consensus
-    expect_equal(as.vector(round(select.procrustes(proc_super_2D$coords, selector = mean)[[1]], 8)), as.vector(unname(round(proc_super_2D$consensus, 8))))
-    expect_equal(as.vector(round(select.procrustes(proc_super_2D, selector = mean)[[1]], 8)), as.vector(round(proc_super_2D$consensus, 8)))
-    expect_equal(as.vector(round(select.procrustes(proc_super_3D$coords, selector = mean)[[1]], 8)), as.vector(round(proc_super_3D$consensus, 8)))
-    expect_equal(as.vector(round(select.procrustes(proc_super_3D, selector = mean)[[1]], 8)), as.vector(round(proc_super_3D$consensus, 8)))
+    expect_equal(as.vector(round(select.procrustes(proc_super_2D$coords, selector = base::mean)[[1]], 8)), as.vector(unname(round(proc_super_2D$consensus, 8))))
+    expect_equal(as.vector(round(select.procrustes(proc_super_2D, selector = base::mean)[[1]], 8)), as.vector(round(proc_super_2D$consensus, 8)))
+    expect_equal(as.vector(round(select.procrustes(proc_super_3D$coords, selector = base::mean)[[1]], 8)), as.vector(round(proc_super_3D$consensus, 8)))
+    expect_equal(as.vector(round(select.procrustes(proc_super_3D, selector = base::mean)[[1]], 8)), as.vector(round(proc_super_3D$consensus, 8)))
 
     ## Works with different functions
     default <- select.procrustes(proc_super_2D$coords)
