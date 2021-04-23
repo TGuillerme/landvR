@@ -1,5 +1,3 @@
-context("array.to")
-
 ## Test
 test_that("array.to works", {
 

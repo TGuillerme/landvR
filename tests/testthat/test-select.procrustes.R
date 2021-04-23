@@ -1,7 +1,3 @@
-#TESTING area.diff
-
-context("select.procrustes")
-
 #Test
 test_that("select.procrustes sanitizing works", {
 

@@ -40,7 +40,7 @@ select.procrustes <- function(procrustes, selector = mean, factors){#, specimen 
     
     ## selector
     check.class(selector, "function")
-    fun_level <- dispRity::make.metric(selector, silent = TRUE)
+    fun_level <- dispRity::make.metric(selector, silent = TRUE)$type
     if(fun_level != "level1") {
         stop("selector should output a single specific value.")
     }

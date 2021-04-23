@@ -1,5 +1,3 @@
-context("rarefy.stat")
-
 ## Test
 test_that("rarefy.stat works", {
 

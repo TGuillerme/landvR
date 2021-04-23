@@ -1,5 +1,3 @@
-context("slope.diff")
-
 ## Test
 test_that("slope.diff works", {
 

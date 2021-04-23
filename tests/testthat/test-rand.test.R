@@ -1,7 +1,3 @@
-#TESTING rand.test
-
-context("rand.test")
-
 #Test
 test_that("rand.test sanitizing works", {
 

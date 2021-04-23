@@ -1,7 +1,3 @@
-#TESTING area.diff
-
-context("coordinates.difference")
-
 ## Loading the geomorph dataset
 require(geomorph)
 data(plethodon)

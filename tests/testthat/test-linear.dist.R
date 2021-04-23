@@ -1,5 +1,3 @@
-context("linear.dist")
-
 ## Test
 test_that("linear.dist works", {
 

@@ -1,7 +1,3 @@
-#TESTING area.diff
-
-context("variation.range")
-
 #Test
 test_that("variation.range sanitizing works", {
 

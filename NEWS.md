@@ -21,7 +21,7 @@ dispRity 0.2.0 (2016-04-01)
 
   * Blabla
  -->
-landvR v0.5 (2020-02-10)
+landvR v0.5.1 (2020-04-23)
 =========================
 
 ## NEW FEATURES
@@ -33,10 +33,11 @@ landvR v0.5 (2020-02-10)
 
 ## MINOR IMPROVEMENTS
 
- * `coordinates.difference` now has a `rounding` tolerance argument for rounding values (suggest by [Ellen Coombs](https://twitter.com/EllenCoombs)). Also, the function can not produce infinite angles anymore (`NaN` are replaced by `0`).
+ * `coordinates.difference` now has a `rounding` tolerance argument for rounding values (suggested by [Ellen Coombs](https://twitter.com/EllenCoombs)). Also, the function can not produce infinite angles anymore (`NaN` are replaced by `0`).
  * `variation.range` can now take an `"array"` as the `procrustes` argument.
  * `"mshape"` objects are now automatically coerced as `"matrix"` in `coordinates.difference`.
  * Improved test coverage.
+ * Added a `lwd` argument to `procrustes.var.plot` (suggested by [Pietro Viacava](https://www.researchgate.net/profile/Pietro-Viacava))
 
 
 landvR v0.2 (2019-02-05)

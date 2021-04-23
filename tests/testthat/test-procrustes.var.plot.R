@@ -1,7 +1,3 @@
-#TESTING procrustes.var.plot
-
-context("procrustes.var.plot")
-
 #Test
 test_that("procrustes.var.plot sanitizing works", {
     ## Loading the geomorph dataset

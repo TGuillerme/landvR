@@ -61,7 +61,7 @@ area.diff <- function(x, y, rarefy, cent.tend = mean, sort = TRUE) {
         silent <- check.class(rarefy, c("integer", "numeric"))
     }
     check.class(cent.tend, "function")
-    test_fun <- dispRity::make.metric(cent.tend, silent = TRUE)
+    test_fun <- dispRity::make.metric(cent.tend, silent = TRUE)$type
     if(test_fun != "level1") {
         stop(paste0("Central tendency function ", as.expression(match_call$cent.tend), " must output a single value."))
     }

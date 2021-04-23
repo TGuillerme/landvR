@@ -1,7 +1,3 @@
-#TESTING area.diff
-
-context("coordinates.area")
-
 #Test
 test_that("coordinates.area sanitizing works", {
 

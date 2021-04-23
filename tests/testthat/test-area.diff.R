@@ -1,7 +1,3 @@
-#TESTING area.diff
-
-context("area.diff")
-
 #Test
 test_that("area.diff works", {
 
