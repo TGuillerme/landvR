@@ -4,12 +4,14 @@
 \alias{prop.part.names}
 \title{Get the partitions tip labels from a tree}
 \usage{
-prop.part.names(phy, singletons = FALSE)
+prop.part.names(phy, singletons = FALSE, inc.nodes = FALSE)
 }
 \arguments{
 \item{phy}{an object of class \code{"phylo"}}
 
 \item{singletons}{logical, whether to include tips as singletons (\code{TRUE}) or not (\code{FALSE} - default)}
+
+\item{inc.nodes}{logical, whether to include nodes in the clades (\code{TRUE}) or not (\code{FALSE} - default). If \code{TRUE}, \code{phy} must have node labels.}
 }
 \description{
 Get the names of the tip labels in each bipartition (clade) of a tree.
