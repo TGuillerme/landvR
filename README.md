@@ -71,3 +71,5 @@ If you are using the landmark variation test, please cite the paper:
     
     
 You can find a list of papers that cited `landvR` and got picked by google scholar [here](https://scholar.google.co.uk/scholar?oi=bibs&hl=en&cites=3216410024546316584).
+
+`landvR` has been cited in [these cool papers](https://scholar.google.co.uk/scholar?oi=bibs&hl=en&authuser=1&cites=3216410024546316584).
