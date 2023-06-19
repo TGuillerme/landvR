@@ -38,9 +38,6 @@ slope.diff(slope_b, slope_c, angle = "radian")
 slope.diff(slope_b, slope_c, significance = 4.5)
 
 }
-\seealso{
-
-}
 \author{
 Thomas Guillerme and Ariel Marcy
 }
