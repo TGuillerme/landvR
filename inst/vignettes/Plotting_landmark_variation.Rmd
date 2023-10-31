@@ -1,0 +1,176 @@
+---
+title: "Plotting landmark variation"
+author: "Thomas Guillerme"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    fig_width: 8
+    fig_height: 4
+---
+
+One potential useful function of the `landvR` package is the `procrustes.var.plot` function that allows to visualise specific types of variations in landmark positions between specimens after a Procrustes superimposition.
+
+# Loading some demo data
+
+For this demo, we will use the `plethodon` data from `geomorph`.
+Plethodons are some [cool little salamanders](https://en.wikipedia.org/wiki/Plethodon) and the `data(plethodon)` dataset from `geomorph` contains raw landmark positions of their skulls (see `?plethodon` for info and references).
+Here we're just tanking the landmarks of this raw dataset and performing a default Procrustes superimposition on it (`geomorpg::gpagen`).
+
+```{r}
+## Loading the geomorph dataset
+library(geomorph)
+library(landvR)
+data(plethodon)
+## Performing the Procrustes superimposition
+proc_super <- gpagen(plethodon$land, print.progress = FALSE)
+```
+
+## Visualising the data
+
+We can then visualise these landmark positions (and the average landmark configuration) by using the default `geomorph::plot.gpagen` function: {#geomorph_default}
+
+```{r}
+## Plotting all the superimposed landmarks
+## and the average landmark configuration
+par(bty = "n")
+plot(proc_super)
+```
+
+Although very smooth, informative and easy, this function does not allow to visualise:
+
+ * trends in variation (like summarising the range of variation);
+ * changing the central tendency (the black dots can only represent the mean position, not the median or something else);
+ * changing the graphical parameters (although it is possible to change some through the `plot.param` argument from `geomorph::plotAllSpecimens` function).
+
+Depending on what you want to use the plot for, you might want to consider the more modular `landvR::procrustes.var.plot` function below.
+
+# Simple range variation plot
+
+First, you'll need to consider which variation you want to display.
+There are many different types of variation that one might want to display between landmarks.
+For example, you might want to display the range of landmark variation in you dataset, the general direction of landmark change, etc.
+
+For example here, we want to compare the two most distant specimens to show the range of specimens variation.
+For that we can use the `landvR::variation.range` function that allows to select usually two specimens based on different variation parameters.
+Here we can select the two extreme specimens using the default parameters.
+This default function uses the spherical coordinates system (see details on different coordinates systems in `landvR` [here](https://raw.githack.com/TGuillerme/landvR/master/inst/vignettes/Landmark_variation_differences.html)) to detect the two specimens that have the most different landmarks configurations.
+
+```{r}
+## Getting the range of variation
+variation <- variation.range(proc_super, return.ID = TRUE)
+```
+
+This returns a list containing the range of distances (`radius`) and angles (`azimuth`) for each landmarks and the IDs of the specimens that have the most different ranges (by default considering the `radius`).
+More information on these ranges is described in the function manual (`?variation.ranges`). 
+ <!-- details [below](#ranges_variation). -->
+
+```{r}
+variation
+```
+
+We can then select the two specimens of interest from the procrustes list (`proc_super$coords`) and plot their differences:
+
+```{r}
+## Selecting the coordinates and the variation vector
+minimum_range <- proc_super$coords[, , variation$min.max[1]]
+maximum_range <- proc_super$coords[, , variation$min.max[2]]
+ 
+## Plot the variation
+procrustes.var.plot(minimum_range, maximum_range, main = "Range of landmarks displacement")
+```
+
+The grey dots here represent the specimen at one extreme of the range and the arrow points to the specimen at the other extreme.
+Note that here we chose to display the variation between the two sides of the range but we can plot any differences between any pair of specimens.
+For example we can easily see the differences between specimens 1 and 2:
+
+```{r}
+## The variation between specimens 1 and 2
+procrustes.var.plot(proc_super$coords[,,1], proc_super$coords[,,2], main = "Differences between specimens 1 and 2")
+```
+
+<!-- More on that [below](#ranges_variation). -->
+
+
+# Different plotting options
+
+Of course, we can use many different plotting options to address the modularity issue highlighted above.
+For example, we can change the colours by providing a vector of colours for each dots (rainbows!) and a colour for the arrows (`"pink"`), changing the point sizes (`pt.size = 1.5`) and the line width (`lwd = 3`). 
+
+```{r}
+## getting a different rainbow colour for each landmark
+point_colours <- grDevices::rainbow(nrow(minimum_range))
+## A colourful plot
+procrustes.var.plot(minimum_range, maximum_range,
+                    col = list(point_colours, "pink"),
+                    pt.size = 1.5, lwd = 3)
+```
+
+Beautiful! Albeit not especially that useful for convening information.
+One potential useful way to represent variation is to use a colour code for both the points and the arrows that changes with the value of the colour.
+You can do that by providing a colour gradient function to the `col` argument, such as `grDevices::heat.colors` to generate different colours depending on the value of the range.
+To provide the value of the range of variation, you can provide it to the `col.val` argument as follows:
+
+```{r}
+## Getting the range of variation in radius
+variation_range <- variation$range[, "radius"]
+## Plotting the variation using a colour gradient
+procrustes.var.plot(minimum_range, maximum_range,
+                    col = grDevices::heat.colors,
+                    col.val = variation_range)
+```
+
+The bigger the range, the hotter the colour.
+It is off course possible to provide different information and/or gradients for different elements in the plots by providing them as an ordered list, the first element applies to the points and the second to the arrows.
+For example having the arrows coloured with the the range of variation (using `grDevices::heat.colors`) and the points with the points coloured using the angle of variation (using `grDevides::terrain.colors`):
+
+
+```{r}
+## Getting the range of variation in angles
+variation_angle <- variation$range[, "azimuth"]
+## Plotting the variation using a colour gradient
+procrustes.var.plot(minimum_range, maximum_range,
+                    col = list(grDevices::terrain.colors,
+                               grDevices::heat.colors),
+                    col.val = list(variation_angle,
+                                   variation_range),
+                    col.range = c(0, 0.2))
+```
+
+Note that by default, the relative range of colours is plotted.
+When using two different variables, it is advised to use a fixed range to display the absolute range of the variation.
+
+Of course, you can also use many other optional arguments that are normally passed to `plot` (like `main`, `xlab`, etc.) or options directly from `procrustes.var.plot` (like `axes` or `labels` - all details are in the function manual `?procrustes.var.plot`).
+
+## 3D plots!
+
+The example above illustrates plotting options using 2D landmarks.
+It is of course possible to do the same with 3D landmarks!
+The function automatically plots the results in 3D if the input procrustes superimposition is 3D.
+Here is an example with the 3D example dataset from `geomorph`: `scallops` (see `?scallops` for all the details):
+
+```{r}
+## Loading the scallops 3D data from geomorph
+data(scallops)
+
+## Procrustes superimposition
+procrustes <- gpagen(scallops$coorddata, print.progress = FALSE)
+
+## Getting the range of variation
+variation <- variation.range(procrustes, return.ID = TRUE)
+
+## Selecting the coordinates and the variation vector
+M1 <- procrustes$coords[, , variation$min.max[1]]
+M2 <- procrustes$coords[, , variation$min.max[2]]
+var_val <- variation$range[, 1]
+
+## Plot the variation in 3D
+procrustes.var.plot(M1, M2, col.val = var_val,
+                    col = list(grDevices::heat.colors, "grey"))
+rglwidget()
+```
+
+<!-- # Range variation {#ranges_variation}
+
+As mentioned above, there are different ways to choose to display the range of variation between a series of landmarks.
+For example, one might be interested to display the spread of landmarks around a mean configuration (as is done with the default plots from `geomorph` seen [above](#geomorph_default)).
+ -->
