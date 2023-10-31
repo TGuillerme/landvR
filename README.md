@@ -70,6 +70,4 @@ If you are using the landmark variation test, please cite the paper:
     ##### [RIS](https://frontiersinzoology.biomedcentral.com/articles/10.1186/s12983-019-0338-5.ris), [more...](https://frontiersinzoology.biomedcentral.com/articles/10.1186/s12983-019-0338-5#citeas)
     
     
-You can find a list of papers that cited `landvR` and got picked by google scholar [here](https://scholar.google.co.uk/scholar?oi=bibs&hl=en&cites=3216410024546316584).
-
-`landvR` has been cited in [these cool papers](https://scholar.google.co.uk/scholar?oi=bibs&hl=en&authuser=1&cites=3216410024546316584).
+You can find a list of papers that cited `landvR` and got picked by google scholar [here](https://scholar.google.co.uk/scholar?oi=bibs&hl=en&cites=3216410024546316584&as_sdt=5).
