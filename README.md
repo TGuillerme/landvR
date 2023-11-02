@@ -9,7 +9,7 @@
  
 Development (master):
 
-[![Build Status](https://travis-ci.org/TGuillerme/landvR.svg?branch=master)](https://travis-ci.org/TGuillerme/landvR)
+[![R-CMD-check](https://github.com/TGuillerme/landvR/workflows/R-CMD-check/badge.svg)](https://github.com/TGuillerme/landvR/actions)
 [![codecov](https://codecov.io/gh/TGuillerme/landvR/branch/master/graph/badge.svg)](https://codecov.io/gh/TGuillerme/landvR)
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![develVersion](https://img.shields.io/badge/devel%20version-0.3-green.svg?style=flat)](https://github.com/TGuillerme/landvR)
