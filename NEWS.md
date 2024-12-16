@@ -1,27 +1,14 @@
-----
-<!-- * 2017/10/18 - v1.0 *got you covered*  -->
 
-<!-- 
-dispRity 0.2.0 (2016-04-01)
+landvR v0.5.3 (2024-12-16)
 =========================
 
-### NEW FEATURES
+## NEW FEATURES
 
-  * Blabla
+ * `update.gpa.pca`: a for adding specimens correctly to a PCA.
+  - [ ] TODO: add tests
+  - [ ] TODO: add tests
 
-### MINOR IMPROVEMENTS
-
-  * Blabla
-
-### BUG FIXES
-
-  * Blabla
-
-### DEPRECATED AND DEFUNCT
-
-  * Blabla
- -->
-landvR v0.5.2 (1-07-29)
+landvR v0.5.2 (2021-07-29)
 =========================
 
 ## NEW FEATURES

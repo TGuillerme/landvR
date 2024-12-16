@@ -58,17 +58,17 @@ update.gpa.pca <- function(original_data, new_landmarks, ...) {
     }
 
     ## Transform the GPA into a matrix
-    original_gpa_matrix <- landvR::array.to(original_gpa$rotated, to = "matrix")
+    original_gpa_matrix <- array.to(original_gpa$rotated, to = "matrix")
     ## Run the PCA for the original GPA
-    original_pca <- prcomp(original_gpa_matrix)
+    original_pca <- stats::prcomp(original_gpa_matrix)
 
     ## Project the new specimens on the original GPA
     new_gpa <- Morpho::align2procSym(original_gpa, new_landmarks)
     dimnames(new_gpa)[[3]] <- dimnames(new_landmarks)[[3]]
     ## Transform the GPA into a matrix
-    new_gpa_matrix <- landvR::array.to(new_gpa, to = "matrix")
+    new_gpa_matrix <- array.to(new_gpa, to = "matrix")
     ## Project the new GPAed specimens onto the PCA
-    new_pca <- predict(original_pca, newdata = new_gpa_matrix)
+    new_pca <- stats::predict(original_pca, newdata = new_gpa_matrix)
 
     ## Combine the new and old matrices for the output PCA
     return(rbind(pca_orig$x, new_pca))
