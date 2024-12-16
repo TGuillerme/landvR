@@ -71,7 +71,7 @@ update.gpa.pca <- function(original_data, new_landmarks, ...) {
     new_pca <- stats::predict(original_pca, newdata = new_gpa_matrix)
 
     ## Combine the new and old matrices for the output PCA
-    return(rbind(pca_orig$x, new_pca))
+    return(rbind(original_pca$x, new_pca))
 }
 
 # test <- update.gpa.pca(original_landmarks, new_spec)
