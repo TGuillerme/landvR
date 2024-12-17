@@ -4,26 +4,36 @@
 \alias{update.gpa.pca}
 \title{Update GPA and PCA}
 \usage{
-update.gpa.pca(original_data, new_landmarks, ...)
+update.gpa.pca(
+  original_data,
+  new_landmarks,
+  center.pca = TRUE,
+  scale.pca = FALSE,
+  ...
+)
 }
 \arguments{
 \item{original_data}{Either an \code{"array"} that is a named set of n landmarks in D dimensions corresponding to the original specimens; or directly a \code{"nosymproc"} or \code{"symproc"} object output from \code{Morpho::procSym}.}
 
 \item{new_landmarks}{a named set of n landmarks in D dimensions corresponding to the new specimens}
 
-\item{...}{any optional arguments to pass to ProcSym}
+\item{center.pca}{\code{logical}, if \code{original_data} is \code{"nosymproc"} or \code{"symproc"}, whether to calculate the centering vector for the pca (default is \code{TRUE}).}
+
+\item{scale.pca}{\code{logical}, if \code{original_data} is \code{"nosymproc"} or \code{"symproc"}, whether to calculate the centering vector for the pca (default is \code{FALSE}).}
+
+\item{...}{any optional arguments to pass to \code{Morpho::procSym}.}
 }
 \description{
 Adds new specimens (landmarks) to an existing GPA and PCA.
 }
 \details{
 This function does the following:
-\begin{itemize}
+\itemize{
 \item 1- Either runs a GPA (using \code{Morpho::ProcSym}) and a PCA (using \code{stats::prcomp}) if the input is an \code{"array"} of landmarks; or extracts the GPA and runs a PCA (using \code{stats::prcomp}) if the input is a \code{"nosymproc"} or \code{"symproc"} object.
 \item 2- Aligns the new landmarks onto the original GPA (using \code{Morpho::align2procSym}).
 \item 3- Projects these superimposed landmarks onto the original PCA (using \code{stats::predict}).
 \item 4- Merges and output the combined PCA containing the new specimens.
-\end{itemize}
+}
 }
 \examples{
 
