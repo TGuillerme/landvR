@@ -2,10 +2,18 @@
 % Please edit documentation in R/landvR-package.R
 \docType{package}
 \name{landvR-package}
+\alias{landvR}
 \alias{landvR-package}
 \title{Utility package for studying landmark variation}
 \description{
 This package contains utility functions to study landmark variations in a Procrustes space
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/TGuillerme/landvR}
+}
+
 }
 \author{
 Thomas Guillerme <guillert@tcd.ie>

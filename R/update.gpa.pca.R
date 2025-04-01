@@ -45,6 +45,12 @@
 
 update.gpa.pca <- function(original_data, new_landmarks, center.pca = TRUE, scale.pca = FALSE, ...) {
 
+# stop("DEBUG: update.gpa.pca")
+# original_data <- proc_orig
+# new_landmarks <- old_spec
+# center.pca = TRUE
+# scale.pca = FALSE
+
     ## Sanitizing
     input_class <- check.class(original_data, c("array", "symproc", "nosymproc"))
     check.class(new_landmarks, "array")
@@ -105,12 +111,85 @@ update.gpa.pca <- function(original_data, new_landmarks, center.pca = TRUE, scal
     }
 
     ## Project the new specimens on the original GPA
-    new_gpa <- Morpho::align2procSym(original_gpa, new_landmarks)
+    new_gpa <- Morpho::align2procSym(original_gpa, new_landmarks, orp = TRUE)
+
+# stop("DEBUG: udate.gpa.pca")
+
+    # x <- original_gpa
+    # newdata <- new_landmarks
+
+    # n <- dim(newdata)[3]
+
+    # atts <- attributes(x)
+
+    # newdatarot <- newdata
+
+    # all(newdatarot[,,1] == original_landmarks[,,1])
+
+    # # Correct for size
+    # if (atts$CSinit) {
+    #     mysize <- apply(newdata,3,cSize)
+    #     for (i in 1:n){
+    #             newdata[,,i] <- newdata[,,i]/mysize[i]}
+    # }
+
+    # # if (is.null(atts$use.lm)) {
+    #     for (i in 1:n) {
+    #         newdatarot[,,i] <- rotonto(x$mshape,newdata[,,i],scale=atts$scale,reflection=atts$reflect,centerweight=atts$centerweight,weights=atts$weights)$yrot
+
+    #         ## Target is 0.3481
+    #         # x$rotated[c(1,2),,1]
+    #         #           [,1]         [,2]        [,3]
+    #         # [1,] 0.3481483  0.002220578 -0.01668868
+    #         # [2,] 0.3924149 -0.001269111 -0.00550850
+    #         rotonto(x$mshape,newdata[,,i],scale=atts$scale,reflection=atts$reflect,centerweight=atts$centerweight,weights=atts$weights)$yrot[1,1]
+    #         test <- rotonto(x$mshape,newdata[,,i],scale=atts$scale,reflection=atts$reflect,centerweight=atts$centerweight,weights=atts$weights)
+    #         test$yrot[c(1,2),] - test$trans
+
+    #         rotonto(test$yrot,x$mshape,scale=atts$scale,reflection=atts$reflect,centerweight=atts$centerweight,weights=atts$weights)$yrot
+
+    #     }
+#     # } else {
+#     #     for (i in 1:n) {
+#     #         newdatarot[,,i] <- rotonmat(newdata[,,i],newdata[atts$use.lm,,i],x$mshape[atts$use.lm,],scale=atts$scale,reflection=atts$reflect,centerweight=atts$centerweight,weights=atts$weights)
+#     #     }
+#     #     if (atts$center.part) {
+#     #         newdatarot[,,i] <- scale(newdatarot[,,i], scale=FALSE)
+#     #     } else {
+#     #         orp=FALSE
+#     #     }
+#     # }
+    
+#     # if (atts$orp && orp) {
+#         # source("~/Packaging/Morpho/R/orp.r")
+#         orpdata <- orp(newdatarot,x$mshape)
+#     # } else {
+#         orpdata <- newdatarot
+#     # }
+#     # if(dim(orpdata)[3] == 1) {
+#     #     orpdata <- orpdata[,,1]
+#     # }
+#     # return(orpdata)
+#         new_gpa <- orpdata
+# # }
+
+#     ## NEEDS TO BE EQUAL
+#     all(x$rotated[,,1] == new_gpa[,,1])
+#     sum((x$rotated[,,1] - new_gpa[,,1])^2)
+
     dimnames(new_gpa)[[3]] <- dimnames(new_landmarks)[[3]]
     ## Transform the GPA into a matrix
     new_gpa_matrix <- array.to(new_gpa, to = "matrix")
     ## Project the new GPAed specimens onto the PCA
     new_pca <- stats::predict(original_pca, newdata = new_gpa_matrix)
+
+#     updated_pca <- rbind(original_pca$x, new_pca)
+# stop("DEBUG:update.gpa.pca")
+
+
+
+
+
 
     ## Combine the new and old matrices for the output PCA
     return(rbind(original_pca$x, new_pca))
